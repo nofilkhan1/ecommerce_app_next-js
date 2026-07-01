@@ -48,7 +48,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Announcement Bar */}
-      <div className="bg-[#111] text-white text-center py-2 px-4 text-xs overflow-hidden">
+      <div className="bg-[#111827] text-white text-center py-2 px-4 text-xs overflow-hidden">
         <div className="announcement-marquee whitespace-nowrap inline-block">
           <span className="mx-8">Flat 20% OFF on Summer Collection | Use Code: SUMMER20</span>
           <span className="mx-8">Free Delivery on Orders Above PKR 5,000</span>
@@ -58,10 +58,10 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       </div>
 
       {/* Top Bar */}
-      <div className="border-b border-neutral-100">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-9 text-xs text-[#666]">
+      <div className="border-b border-[#f3f4f6]">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-9 text-xs text-[#6b7280]">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1 cursor-pointer hover:text-black transition">
+            <span className="flex items-center gap-1 cursor-pointer hover:text-[#111827] transition">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                 <circle cx="12" cy="10" r="3"/>
@@ -70,15 +70,15 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hover:text-black cursor-pointer transition">Track Order</span>
-            <span className="text-neutral-200">|</span>
-            <span className="hover:text-black cursor-pointer transition">Help</span>
+            <span className="hover:text-[#111827] cursor-pointer transition">Track Order</span>
+            <span className="text-[#e5e7eb]">|</span>
+            <span className="hover:text-[#111827] cursor-pointer transition">Help</span>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-100">
+      <header className="sticky top-0 z-50 bg-white border-b border-[#f3f4f6]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-16 lg:h-[72px]">
           {/* Mobile Menu Toggle */}
           <button
@@ -101,18 +101,18 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
               <div key={item.label} className="mega-menu-trigger relative group">
                 <Link
                   href={item.href}
-                  className="text-[13px] font-semibold tracking-[0.05em] text-[#222] hover:text-[#666] transition py-2"
+                  className="text-[13px] font-semibold tracking-[0.05em] text-[#374151] hover:text-[#6b7280] transition py-2"
                 >
                   {item.label}
                 </Link>
                 {item.children && item.children.length > 0 && (
-                  <div className="mega-menu-content absolute top-full left-1/2 -translate-x-1/2 bg-white border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-5 min-w-[200px] z-50">
+                  <div className="mega-menu-content absolute top-full left-1/2 -translate-x-1/2 bg-white border border-[#f3f4f6] shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-5 min-w-[200px] z-50">
                     <div className="space-y-2.5">
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
                           href={child.href}
-                          className="block text-sm text-[#666] hover:text-black transition"
+                          className="block text-sm text-[#6b7280] hover:text-[#111827] transition"
                         >
                           {child.label}
                         </Link>
@@ -127,7 +127,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
           {/* Actions */}
           <div className="flex items-center gap-4">
             {/* Search */}
-            <button onClick={() => setSearchOpen(!searchOpen)} className="text-[#222] hover:text-[#666] transition">
+            <button onClick={() => setSearchOpen(!searchOpen)} className="text-[#374151] hover:text-[#6b7280] transition">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="M21 21l-4.35-4.35"/>
@@ -135,13 +135,13 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
             </button>
 
             {/* Cart */}
-            <Link href="/products" className="text-[#222] hover:text-[#666] transition relative">
+            <Link href="/products" className="text-[#374151] hover:text-[#6b7280] transition relative">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 01-8 0"/>
               </svg>
-              <span className="absolute -top-1.5 -right-2 bg-[#111] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-1.5 -right-2 bg-[#2563eb] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-medium">
                 0
               </span>
             </Link>
@@ -150,12 +150,12 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
 
         {/* Search Bar */}
         {searchOpen && (
-          <div className="border-t border-neutral-100 py-4">
+          <div className="border-t border-[#f3f4f6] py-4">
             <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
               <input
                 type="text"
                 placeholder="Search for products..."
-                className="w-full border border-neutral-200 px-4 py-3 text-sm focus:outline-none focus:border-[#111] transition"
+                className="w-full border border-[#d1d5db] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bfdbfe] focus:border-[#2563eb] transition"
                 autoFocus
               />
             </div>
@@ -168,9 +168,9 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
           <div className="absolute left-0 top-0 h-full w-80 bg-white overflow-y-auto shadow-[4px_0_20px_rgba(0,0,0,0.1)]">
-            <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
+            <div className="p-4 border-b border-[#f3f4f6] flex items-center justify-between">
               <img src="/assets/logo.svg" alt="J." className="h-7" />
-              <button onClick={() => setMobileMenuOpen(false)} className="text-[#888] hover:text-black">
+              <button onClick={() => setMobileMenuOpen(false)} className="text-[#9ca3af] hover:text-[#111827]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
@@ -181,7 +181,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <div key={item.label} className="mb-4">
                   <Link
                     href={item.href}
-                    className="font-semibold text-sm block py-2 text-[#222]"
+                    className="font-semibold text-sm block py-2 text-[#111827]"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
@@ -192,7 +192,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                         <Link
                           key={child.label}
                           href={child.href}
-                          className="text-sm text-[#666] block py-1 hover:text-black transition"
+                          className="text-sm text-[#6b7280] block py-1 hover:text-[#111827] transition"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {child.label}
@@ -211,7 +211,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-[#111] text-white mt-auto">
+      <footer className="bg-[#111827] text-white mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
             <div className="col-span-2 lg:col-span-1">
@@ -268,9 +268,9 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <input
                   type="email"
                   placeholder="EMAIL ADDRESS"
-                  className="flex-1 bg-white/10 border border-white/20 px-3 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/40 transition"
+                  className="flex-1 bg-white/10 border border-white/20 px-3 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/40 transition rounded-l-lg"
                 />
-                <button className="bg-white text-[#111] px-4 py-2.5 hover:bg-white/90 transition">
+                <button className="bg-[#2563eb] text-white px-4 py-2.5 hover:bg-[#1d4ed8] transition rounded-r-lg">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
                   </svg>

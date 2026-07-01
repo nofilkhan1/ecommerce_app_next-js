@@ -18,7 +18,7 @@ export default function Table({ children, className = '' }: TableProps) {
 export function TableHeader({ children, className = '' }: TableProps) {
   return (
     <thead className={className}>
-      <tr className="border-b border-[#f3f4f6]">
+      <tr className="border-b border-[#e5e7eb] bg-[#f9fafb]">
         {children}
       </tr>
     </thead>
@@ -27,7 +27,7 @@ export function TableHeader({ children, className = '' }: TableProps) {
 
 export function TableHead({ children, className = '' }: TableProps) {
   return (
-    <th className={`text-left text-xs font-semibold text-[#6b7280] uppercase tracking-wider px-4 py-3 ${className}`}>
+    <th className={`text-left text-xs font-semibold text-[#6b7280] uppercase tracking-wider px-5 py-3.5 ${className}`}>
       {children}
     </th>
   );
@@ -47,7 +47,7 @@ export function TableRow({ children, className = '' }: TableProps) {
 
 export function TableCell({ children, className = '' }: TableProps) {
   return (
-    <td className={`px-4 py-3.5 text-sm ${className}`}>
+    <td className={`px-5 py-4 text-sm ${className}`}>
       {children}
     </td>
   );
