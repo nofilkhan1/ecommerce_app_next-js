@@ -100,10 +100,13 @@ function ProductGrid() {
         {/* Product Grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-[#888] text-sm">No products found.</p>
-            <Link href="/products" className="inline-block mt-4 text-xs font-semibold text-[#111] border-b border-[#111] pb-0.5">
-              View All Products
-            </Link>
+            <div className="text-4xl mb-4">{products.length === 0 ? '✨' : '🔍'}</div>
+            <p className="text-[#6b7280] text-sm font-medium">
+              {products.length === 0 ? 'Our latest collection will be available shortly.' : 'No products match your search.'}
+            </p>
+            <p className="text-[#9ca3af] text-xs mt-1">
+              {products.length === 0 ? 'Check back soon for new arrivals.' : 'Try adjusting your search criteria.'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

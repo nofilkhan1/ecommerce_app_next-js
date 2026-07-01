@@ -49,7 +49,8 @@ export default function ProductDetail() {
     return (
       <StorefrontLayout>
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-          <p className="text-[#888]">Product not found.</p>
+          <div className="text-4xl">🔍</div>
+          <p className="text-[#6b7280] text-sm font-medium">Product not found.</p>
           <Link href="/products" className="text-xs font-semibold text-[#111] border-b border-[#111] pb-0.5">
             Back to products
           </Link>
@@ -116,13 +117,13 @@ export default function ProductDetail() {
 
             <div className="mb-5">
               {product.stock > 0 ? (
-                <p className="text-xs text-[#2e7d32] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-[#2e7d32] rounded-full" />
+                <p className="text-xs text-[#065f46] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full" />
                   In Stock ({product.stock} available)
                 </p>
               ) : (
-                <p className="text-xs text-[#d32f2f] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-[#d32f2f] rounded-full" />
+                <p className="text-xs text-[#991b1b] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#ef4444] rounded-full" />
                   Out of Stock
                 </p>
               )}

@@ -108,10 +108,9 @@ export default function HomePage() {
 
           {featured.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-[#888] text-sm">No products yet. Add some from the admin panel.</p>
-              <Link href="/admin" className="inline-block mt-4 text-xs font-semibold text-[#111] border-b border-[#111] pb-0.5">
-                Go to Admin
-              </Link>
+              <div className="text-4xl mb-4">✨</div>
+              <p className="text-[#6b7280] text-sm font-medium">Our latest collection will be available shortly.</p>
+              <p className="text-[#9ca3af] text-xs mt-1">Check back soon for new arrivals.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

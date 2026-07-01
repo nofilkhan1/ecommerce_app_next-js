@@ -70,7 +70,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/admin" className="hover:text-black transition">Track Order</Link>
+            <span className="hover:text-black cursor-pointer transition">Track Order</span>
             <span className="text-neutral-200">|</span>
             <span className="hover:text-black cursor-pointer transition">Help</span>
           </div>
@@ -133,14 +133,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <path d="M21 21l-4.35-4.35"/>
               </svg>
             </button>
-
-            {/* User */}
-            <Link href="/admin" className="text-[#222] hover:text-[#666] transition hidden sm:block">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </Link>
 
             {/* Cart */}
             <Link href="/products" className="text-[#222] hover:text-[#666] transition relative">
@@ -222,7 +214,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       <footer className="bg-[#111] text-white mt-auto">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
-            {/* Contact */}
             <div className="col-span-2 lg:col-span-1">
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">CONTACT</h4>
               <div className="space-y-3 text-sm text-white/60">
@@ -242,8 +233,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 </p>
               </div>
             </div>
-
-            {/* Company */}
             <div>
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">COMPANY</h4>
               <ul className="space-y-2.5 text-sm text-white/60">
@@ -253,8 +242,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <li><Link href="#" className="hover:text-white transition">CORPORATE</Link></li>
               </ul>
             </div>
-
-            {/* Customer Support */}
             <div>
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">CUSTOMER SUPPORT</h4>
               <ul className="space-y-2.5 text-sm text-white/60">
@@ -265,8 +252,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <li><Link href="#" className="hover:text-white transition">PAYMENT GUIDE</Link></li>
               </ul>
             </div>
-
-            {/* Connect */}
             <div>
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">CONNECT</h4>
               <ul className="space-y-2.5 text-sm text-white/60">
@@ -277,8 +262,6 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <li><Link href="#" className="hover:text-white transition">LINKEDIN</Link></li>
               </ul>
             </div>
-
-            {/* Newsletter */}
             <div className="col-span-2 lg:col-span-1">
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">SIGN UP FOR NEWSLETTER</h4>
               <div className="flex">
@@ -295,13 +278,9 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
               </div>
             </div>
           </div>
-
-          {/* Payment */}
           <div className="mt-8 pt-8 border-t border-white/10">
             <img src="/assets/payments.svg" alt="Payment Methods" className="h-6 opacity-50" />
           </div>
-
-          {/* Bottom */}
           <div className="mt-6 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/40">
             <p>&copy; {new Date().getFullYear()} J. (Junaid Jamshed). All rights reserved.</p>
             <div className="flex items-center gap-4">
