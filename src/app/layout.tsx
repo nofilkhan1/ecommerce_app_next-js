@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "J. E-Commerce",
-  description: "Premium fashion store",
+  title: "J. | Junaid Jamshed - Premium Fashion Store",
+  description: "Premium fashion for the modern individual. Shop women's, men's, and teens' clothing, fragrances, and accessories.",
+  icons: {
+    icon: "/assets/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

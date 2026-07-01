@@ -24,6 +24,7 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState<number | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const load = useCallback(() => {
     fetch(API, { headers: { 'X-API-Key': ADMIN_KEY } })
@@ -60,8 +61,15 @@ export default function AdminProducts() {
     setShowModal(true);
   }
 
+  function closeModal() {
+    setShowModal(false);
+    setEditing(null);
+    setForm(EMPTY_FORM);
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    setSaving(true);
     const body = {
       name: form.name.trim(),
       description: form.description.trim(),
@@ -85,10 +93,12 @@ export default function AdminProducts() {
         alert('Error: ' + (err.detail || 'Unknown'));
         return;
       }
-      setShowModal(false);
+      closeModal();
       load();
     } catch (err: unknown) {
       alert('Error: ' + (err instanceof Error ? err.message : 'Unknown'));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -106,59 +116,72 @@ export default function AdminProducts() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold">Products</h1>
-        <button onClick={openCreate} className="bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition">
+        <button
+          onClick={openCreate}
+          className="bg-[#111] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#333] transition"
+        >
           + Add Product
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search products..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-sm border border-neutral-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:border-neutral-900"
-      />
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-[360px] px-4 py-2.5 border border-[#ddd] rounded-lg text-sm outline-none focus:border-[#111] transition"
+        />
+      </div>
 
       {loading ? (
-        <p className="text-neutral-500 text-sm">Loading...</p>
+        <p className="text-[#888] text-sm">Loading...</p>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-neutral-500">
-          {products.length === 0 ? 'No products yet. Click "+ Add Product" to get started.' : 'No products match your search.'}
+        <div className="bg-white rounded-xl p-12 text-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+          <p className="text-[#888]">
+            {products.length === 0 ? 'No products yet. Click "+ Add Product" to get started.' : 'No products match your search.'}
+          </p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-xl border shadow-sm">
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-neutral-500 uppercase text-xs bg-neutral-50 border-b">
-                <th className="p-3 font-medium">ID</th>
-                <th className="p-3 font-medium">Image</th>
-                <th className="p-3 font-medium">Name</th>
-                <th className="p-3 font-medium">Category</th>
-                <th className="p-3 font-medium">Price</th>
-                <th className="p-3 font-medium">Stock</th>
-                <th className="p-3 font-medium">Actions</th>
+              <tr className="text-left text-[#888] uppercase text-xs bg-[#fafafa] border-b border-[#eee]">
+                <th className="px-4 py-3 font-medium">ID</th>
+                <th className="px-4 py-3 font-medium">Image</th>
+                <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Category</th>
+                <th className="px-4 py-3 font-medium">Price</th>
+                <th className="px-4 py-3 font-medium">Stock</th>
+                <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b last:border-0 hover:bg-neutral-50">
-                  <td className="p-3">{p.id}</td>
-                  <td className="p-3">
+                <tr key={p.id} className="border-b border-[#f0f0f0] last:border-0 hover:bg-[#fafafa] transition">
+                  <td className="px-4 py-3 text-[#888]">{p.id}</td>
+                  <td className="px-4 py-3">
                     {p.image_url ? (
-                      <img src={p.image_url} alt="" className="w-12 h-12 object-cover rounded-md bg-neutral-100" />
+                      <img src={p.image_url} alt="" className="w-12 h-12 object-cover rounded-md bg-[#f0f0f0]" />
                     ) : (
-                      <span className="text-neutral-300 text-lg">—</span>
+                      <span className="text-[#ccc] text-lg">—</span>
                     )}
                   </td>
-                  <td className="p-3 font-medium">{p.name}</td>
-                  <td className="p-3 text-neutral-600">{p.category || '—'}</td>
-                  <td className="p-3">${Number(p.price).toFixed(2)}</td>
-                  <td className="p-3">{p.stock}</td>
-                  <td className="p-3 space-x-2">
-                    <button onClick={() => openEdit(p)} className="text-xs bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-md transition">
+                  <td className="px-4 py-3 font-medium">{p.name}</td>
+                  <td className="px-4 py-3 text-[#888]">{p.category || '—'}</td>
+                  <td className="px-4 py-3">PKR {Number(p.price).toLocaleString()}</td>
+                  <td className="px-4 py-3">{p.stock}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <button
+                      onClick={() => openEdit(p)}
+                      className="text-xs bg-[#eee] hover:bg-[#ddd] px-3 py-1.5 rounded-md transition mr-1"
+                    >
                       Edit
                     </button>
-                    <button onClick={() => remove(p.id)} className="text-xs bg-red-500 text-white hover:bg-red-600 px-3 py-1.5 rounded-md transition">
+                    <button
+                      onClick={() => remove(p.id)}
+                      className="text-xs bg-[#d32f2f] text-white hover:bg-[#b71c1c] px-3 py-1.5 rounded-md transition"
+                    >
                       Delete
                     </button>
                   </td>
@@ -169,36 +192,65 @@ export default function AdminProducts() {
         </div>
       )}
 
+      {/* Modal */}
       {showModal && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowModal(false)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl p-7 w-[90%] max-w-lg z-50 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/40 z-[200]" onClick={closeModal} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl p-7 w-[90%] max-w-[520px] z-[201] shadow-[0_8px_32px_rgba(0,0,0,0.15)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold">{editing ? 'Edit Product' : 'Add Product'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-neutral-400 hover:text-neutral-700 text-2xl">&times;</button>
+              <h2 className="text-xl font-bold">{editing ? 'Edit Product' : 'Add Product'}</h2>
+              <button onClick={closeModal} className="text-[#888] hover:text-[#222] text-2xl leading-none">&times;</button>
             </div>
             <form onSubmit={save} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold mb-1">Name *</label>
-                <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900" />
+                <label className="block text-xs font-semibold mb-1.5 text-[#222]">Name *</label>
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition"
+                />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1">Description</label>
-                <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900" />
+                <label className="block text-xs font-semibold mb-1.5 text-[#222]">Description</label>
+                <textarea
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition resize-none"
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Price *</label>
-                  <input type="number" step="0.01" min="0.01" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900" />
+                  <label className="block text-xs font-semibold mb-1.5 text-[#222]">Price *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    required
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Stock</label>
-                  <input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900" />
+                  <label className="block text-xs font-semibold mb-1.5 text-[#222]">Stock</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.stock}
+                    onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                    className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition"
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1">Category</label>
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900 bg-white">
+                <label className="block text-xs font-semibold mb-1.5 text-[#222]">Category</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition bg-white cursor-pointer"
+                >
                   <option value="">Select category...</option>
                   <option value="SUMMER COLLECTION">SUMMER COLLECTION</option>
                   <option value="CO-ORDS">CO-ORDS</option>
@@ -209,12 +261,30 @@ export default function AdminProducts() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1">Image URL</label>
-                <input type="url" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-neutral-900" />
+                <label className="block text-xs font-semibold mb-1.5 text-[#222]">Image URL</label>
+                <input
+                  type="url"
+                  value={form.image_url}
+                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full border border-[#ddd] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#111] transition"
+                />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm bg-neutral-100 hover:bg-neutral-200 rounded-md transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 rounded-md transition">{editing ? 'Update' : 'Save'}</button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-2.5 text-sm bg-[#eee] hover:bg-[#ddd] rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2.5 text-sm bg-[#111] text-white hover:bg-[#333] rounded-lg transition disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : editing ? 'Update' : 'Save'}
+                </button>
               </div>
             </form>
           </div>

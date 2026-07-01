@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import StorefrontLayout from '../storefront-layout';
 
 const USER_KEY = 'user-secret-key-2026';
 
@@ -15,6 +16,15 @@ interface Product {
   stock: number;
 }
 
+const ALL_CATEGORIES = [
+  'SUMMER COLLECTION',
+  'CO-ORDS',
+  'READY TO WEAR',
+  'UNSTITCHED',
+  'FORMALS',
+  'ACCESSORIES',
+];
+
 function ProductGrid() {
   const searchParams = useSearchParams();
   const categoryFilter = searchParams.get('category');
@@ -22,7 +32,9 @@ function ProductGrid() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const url = categoryFilter ? `/api/products?category=${encodeURIComponent(categoryFilter)}` : '/api/products';
+    const url = categoryFilter
+      ? `/api/products?category=${encodeURIComponent(categoryFilter)}`
+      : '/api/products';
     fetch(url, { headers: { 'X-API-Key': USER_KEY } })
       .then((r) => r.json())
       .then(setProducts)
@@ -35,69 +47,106 @@ function ProductGrid() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">Products</h1>
-          {categoryFilter && (
-            <p className="text-sm text-neutral-500 mt-1">Category: {categoryFilter}</p>
-          )}
-        </div>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border border-neutral-300 rounded-lg px-3 py-2 text-sm max-w-xs focus:outline-none focus:border-neutral-900"
-        />
+      {/* Page Header */}
+      <div className="bg-[#fafafa] border-b border-neutral-100 py-10 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-[0.05em] text-[#111]" style={{ fontFamily: 'Libre Baskerville, serif' }}>
+          {categoryFilter || 'ALL PRODUCTS'}
+        </h1>
+        <div className="w-12 h-[2px] bg-[#111] mx-auto mt-3" />
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="text-neutral-400 text-sm py-12 text-center">No products found.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filtered.map((p) => (
-            <Link key={p.id} href={`/products/${p.id}`} className="group">
-              <div className="aspect-square bg-neutral-100 rounded-xl overflow-hidden mb-3">
-                {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-neutral-300 text-sm">No image</div>
-                )}
-              </div>
-              <p className="font-medium text-sm truncate">{p.name}</p>
-              <p className="text-sm text-neutral-600">${Number(p.price).toFixed(2)}</p>
-              {p.stock === 0 && <p className="text-xs text-red-500 mt-1">Out of stock</p>}
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
+        {/* Filters Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Link
+              href="/products"
+              className={`px-3 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition ${
+                !categoryFilter
+                  ? 'bg-[#111] text-white border-[#111]'
+                  : 'bg-white text-[#222] border-neutral-200 hover:border-[#111]'
+              }`}
+            >
+              ALL
             </Link>
-          ))}
+            {ALL_CATEGORIES.map((cat) => (
+              <Link
+                key={cat}
+                href={`/products?category=${encodeURIComponent(cat)}`}
+                className={`px-3 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition ${
+                  categoryFilter === cat
+                    ? 'bg-[#111] text-white border-[#111]'
+                    : 'bg-white text-[#222] border-neutral-200 hover:border-[#111]'
+                }`}
+              >
+                {cat}
+              </Link>
+            ))}
+          </div>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border border-neutral-200 px-3 py-2 text-sm max-w-[280px] focus:outline-none focus:border-[#111] transition"
+          />
         </div>
-      )}
+
+        {/* Product Count */}
+        <p className="text-xs text-[#888] mb-6">
+          {filtered.length} product{filtered.length !== 1 ? 's' : ''}
+        </p>
+
+        {/* Product Grid */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-[#888] text-sm">No products found.</p>
+            <Link href="/products" className="inline-block mt-4 text-xs font-semibold text-[#111] border-b border-[#111] pb-0.5">
+              View All Products
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filtered.map((p) => (
+              <Link key={p.id} href={`/products/${p.id}`} className="product-card group bg-white">
+                <div className="product-card-image aspect-[3/4] bg-neutral-100 overflow-hidden relative">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[#ccc] text-sm">
+                      No Image
+                    </div>
+                  )}
+                  {p.stock === 0 && (
+                    <div className="absolute top-2 left-2 bg-[#d32f2f] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider">
+                      OUT OF STOCK
+                    </div>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="text-[10px] text-[#888] mb-1 tracking-[0.05em] uppercase">{p.category}</p>
+                  <p className="text-sm font-medium text-[#222] truncate mb-1">{p.name}</p>
+                  <p className="text-sm font-bold text-[#111]">PKR {Number(p.price).toLocaleString()}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 export default function ProductsPage() {
   return (
-    <>
-      <header className="border-b">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold tracking-tight">J.</Link>
-          <nav className="flex gap-6 text-sm">
-            <Link href="/" className="hover:text-neutral-600">Home</Link>
-            <Link href="/products" className="hover:text-neutral-600">Shop</Link>
-            <Link href="/admin" className="hover:text-neutral-600">Admin</Link>
-          </nav>
+    <StorefrontLayout>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center text-[#888] text-sm">
+          Loading...
         </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-8 flex-1">
-        <Suspense fallback={<p className="text-neutral-500">Loading...</p>}>
-          <ProductGrid />
-        </Suspense>
-      </main>
-
-      <footer className="border-t py-8 text-center text-sm text-neutral-500">
-        <p>&copy; {new Date().getFullYear()} J. E-Commerce. All rights reserved.</p>
-      </footer>
-    </>
+      }>
+        <ProductGrid />
+      </Suspense>
+    </StorefrontLayout>
   );
 }
