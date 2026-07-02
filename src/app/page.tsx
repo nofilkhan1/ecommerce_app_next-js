@@ -6,35 +6,100 @@ import StorefrontLayout from './storefront-layout';
 
 const USER_KEY = 'user-secret-key-2026';
 
+interface ProductImage {
+  id: number;
+  product_id: number;
+  url: string;
+  alt: string;
+  type: string;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
+  slug: string;
+  sku: string;
+  description: string;
+  short_description: string;
   price: number;
-  image_url: string;
-  category: string;
+  sale_price: number | null;
   stock: number;
+  category: string;
+  gender: string;
+  subcategory: string;
+  collection: string;
+  brand: string;
+  status: string;
+  visibility: string;
+  featured: number;
+  tags: string;
+  sizes: string;
+  colors: string;
+  materials: string;
+  weight: number;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords: string;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+  updated_at: string;
+  images?: ProductImage[];
+  primary_image?: string;
+  gallery_images?: string[];
 }
 
 const CATEGORIES = [
-  { name: "Women's Summer", href: '/products?gender=WOMEN&category=summer-collection', image: '/images/categories/summer.jpg' },
-  { name: "Women's Co-ords", href: '/products?gender=WOMEN&category=co-ords', image: '/images/categories/coords.jpg' },
-  { name: "Women's Ready to Wear", href: '/products?gender=WOMEN&category=ready-to-wear', image: '/images/categories/women-1.jpg' },
-  { name: "Men's Ready to Wear", href: '/products?gender=MEN&category=ready-to-wear', image: '/images/categories/men-1.jpg' },
-  { name: "Women's Unstitched", href: '/products?gender=WOMEN&category=unstitched', image: '/images/categories/unstitched.jpg' },
-  { name: "Accessories", href: '/products?gender=WOMEN&category=accessories', image: '/images/categories/accessories.jpg' },
+  { name: "Women's Summer", href: '/products?gender=WOMEN&subcategory=summer-collection', image: '/images/categories/summer.jpg' },
+  { name: "Women's Co-ords", href: '/products?gender=WOMEN&subcategory=co-ords', image: '/images/categories/coords.jpg' },
+  { name: "Women's Ready to Wear", href: '/products?gender=WOMEN&subcategory=ready-to-wear', image: '/images/categories/women-1.jpg' },
+  { name: "Men's Ready to Wear", href: '/products?gender=MEN&subcategory=ready-to-wear', image: '/images/categories/men-1.jpg' },
+  { name: "Women's Unstitched", href: '/products?gender=WOMEN&subcategory=unstitched', image: '/images/categories/unstitched.jpg' },
+  { name: "Accessories", href: '/products?gender=WOMEN&subcategory=accessories', image: '/images/categories/accessories.jpg' },
 ];
+
+function getPrimaryImage(product: Product): string | null {
+  if (product.images && product.images.length > 0) {
+    const primary = product.images.find(img => img.type === 'primary');
+    return primary?.url || product.images[0]?.url || null;
+  }
+  return null;
+}
+
+function formatPrice(price: number, salePrice: number | null): string {
+  if (salePrice !== null && salePrice !== undefined && salePrice < price) {
+    return `<span class="text-base font-bold text-[#111827]">PKR ${Number(salePrice).toLocaleString()}</span> <span class="text-sm text-[#dc2626] line-through">PKR ${Number(price).toLocaleString()}</span>`;
+  }
+  return `PKR ${Number(price).toLocaleString()}`;
+}
+
+function getSalePrice(product: Product): number | null {
+  if (product.sale_price !== null && product.sale_price !== undefined && product.sale_price > 0 && product.sale_price < product.price) {
+    return product.sale_price;
+  }
+  return null;
+}
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch('/api/products', { headers: { 'X-API-Key': USER_KEY } })
+    fetch('/api/products?featured=true&limit=8', { headers: { 'X-API-Key': USER_KEY } })
       .then(async (r) => {
         const text = await r.text();
-        if (!text) return [];
-        try { return JSON.parse(text); } catch { return []; }
+        if (!text) return { data: [] };
+        try { 
+          const parsed = JSON.parse(text);
+          return parsed.data || parsed; 
+        } catch { 
+          return { data: [] }; 
+        }
       })
-      .then((data) => { if (Array.isArray(data)) setFeatured(data.slice(0, 8)); })
+      .then((data) => { 
+        if (Array.isArray(data)) setFeatured(data); 
+        else if (data && Array.isArray(data.data)) setFeatured(data.data);
+      })
       .catch(() => {});
   }, []);
 
@@ -141,34 +206,47 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-              {featured.map((p) => (
-                <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                  <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <polyline points="21 15 16 10 5 21" />
-                        </svg>
+              {featured.map((p) => {
+                const primaryImage = getPrimaryImage(p);
+                const salePrice = getSalePrice(p);
+                return (
+                  <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
+                      {primaryImage ? (
+                        <img src={primaryImage} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        </div>
+                      )}
+                      {p.stock === 0 && (
+                        <div className="absolute top-3 left-3">
+                          <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
+                      <p className="text-[10px] text-[#2563eb] mb-1 tracking-[0.05em] font-medium">{p.gender || ''}</p>
+                      <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#2563eb] transition-colors">{p.name}</p>
+                      <div className="flex items-baseline gap-2">
+                        {salePrice ? (
+                          <>
+                            <span className="text-base font-bold text-[#111827]">PKR {Number(salePrice).toLocaleString()}</span>
+                            <span className="text-sm text-[#dc2626] line-through">PKR {Number(p.price).toLocaleString()}</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</span>
+                        )}
                       </div>
-                    )}
-                    {p.stock === 0 && (
-                      <div className="absolute top-3 left-3">
-                        <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
-                    <p className="text-[10px] text-[#2563eb] mb-1 tracking-[0.05em] font-medium">{(p as any).gender || ''}</p>
-                    <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#2563eb] transition-colors">{p.name}</p>
-                    <p className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</p>
-                  </div>
-                </Link>
-              ))}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
 

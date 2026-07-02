@@ -7,15 +7,48 @@ import StorefrontLayout from '../storefront-layout';
 
 const USER_KEY = 'user-secret-key-2026';
 
+interface ProductImage {
+  id: number;
+  product_id: number;
+  url: string;
+  alt: string;
+  type: 'primary' | 'gallery' | 'thumbnail';
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
+  slug: string;
+  sku: string;
+  description: string;
+  short_description: string;
   price: number;
-  image_url: string;
+  sale_price: number | null;
+  stock: number;
   category: string;
   gender: string;
   subcategory: string;
-  stock: number;
+  collection: string;
+  brand: string;
+  status: string;
+  visibility: string;
+  featured: number;
+  tags: string;
+  sizes: string;
+  colors: string;
+  materials: string;
+  weight: number;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords: string;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+  updated_at: string;
+  images?: ProductImage[];
+  primary_image?: string;
+  gallery_images?: string[];
 }
 
 const GENDER_CATEGORIES: Record<string, { label: string; slug: string }[]> = {
@@ -48,31 +81,59 @@ const GENDER_LABELS: Record<string, string> = {
   TEENS: "Teens Collection",
 };
 
+function getPrimaryImage(product: Product): string | null {
+  if (product.images && product.images.length > 0) {
+    const primary = product.images.find(img => img.type === 'primary');
+    if (primary) return primary.url;
+    return product.images[0].url;
+  }
+  return null;
+}
+
+function formatPrice(price: number, salePrice: number | null): string {
+  if (salePrice !== null && salePrice !== undefined && salePrice < price) {
+    return `<span class="text-base font-bold text-[#111827]">PKR ${Number(salePrice).toLocaleString()}</span> <span class="text-sm text-[#dc2626] line-through">PKR ${Number(price).toLocaleString()}</span>`;
+  }
+  return `PKR ${Number(price).toLocaleString()}`;
+}
+
 function ProductGrid() {
   const searchParams = useSearchParams();
   const gender = searchParams.get('gender') || '';
   const categoryFilter = searchParams.get('category') || '';
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (gender) params.set('gender', gender);
-    if (categoryFilter) params.set('category', categoryFilter);
+    if (categoryFilter) params.set('subcategory', categoryFilter);
     const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
     fetch(url, { headers: { 'X-API-Key': USER_KEY } })
       .then(async (r) => {
         const text = await r.text();
-        if (!text) return [];
-        try { return JSON.parse(text); } catch { return []; }
+        if (!text) return { data: [] };
+        try { 
+          const parsed = JSON.parse(text);
+          return parsed.data || parsed; 
+        } catch { 
+          return { data: [] }; 
+        }
       })
-      .then((data) => { if (Array.isArray(data)) setProducts(data); })
-      .catch(() => {});
+      .then((data) => { 
+        if (Array.isArray(data)) setProducts(data); 
+        else if (data && Array.isArray(data.data)) setProducts(data.data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [gender, categoryFilter]);
 
   let filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    (p.description || '').toLowerCase().includes(search.toLowerCase()) ||
+    (p.tags || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (sortBy === 'price-high') filtered.sort((a, b) => Number(b.price) - Number(a.price));
@@ -82,6 +143,17 @@ function ProductGrid() {
 
   const pageTitle = gender ? (GENDER_LABELS[gender] || 'All Products') : 'All Products';
   const categories = gender ? (GENDER_CATEGORIES[gender] || []) : [];
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-[#6b7280]">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -200,53 +272,66 @@ function ProductGrid() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filtered.map((p) => (
-              <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
-                <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                    {p.stock === 0 && (
-                      <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
-                    )}
-                    {p.stock > 0 && p.stock <= 5 && (
-                      <span className="bg-[#d97706] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">LOW STOCK</span>
-                    )}
-                  </div>
-                  {p.stock > 0 && (
-                    <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200">
-                      <button className="w-full bg-white/95 backdrop-blur-sm text-[#111827] py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-white transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="9" cy="21" r="1" />
-                          <circle cx="20" cy="21" r="1" />
-                          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
+            {filtered.map((p) => {
+              const primaryImage = getPrimaryImage(p);
+              const salePrice = p.sale_price && p.sale_price < p.price ? p.sale_price : null;
+              return (
+                <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+                  <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
+                    {primaryImage ? (
+                      <img src={primaryImage} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
                         </svg>
-                        Add to Cart
-                      </button>
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                      {p.stock === 0 && (
+                        <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
+                      )}
+                      {p.stock > 0 && p.stock <= 5 && (
+                        <span className="bg-[#d97706] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">LOW STOCK</span>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
-                  <h3 className="text-sm font-semibold text-[#374151] mb-2 line-clamp-2 group-hover:text-[#2563eb] transition-colors">{p.name}</h3>
-                  <div className="mt-auto flex items-center justify-between">
-                    <p className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</p>
                     {p.stock > 0 && (
-                      <span className="text-[10px] text-[#16a34a] font-medium bg-[#f0fdf4] px-1.5 py-0.5 rounded">In Stock</span>
+                      <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200">
+                        <button className="w-full bg-white/95 backdrop-blur-sm text-[#111827] py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-white transition-colors">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="9" cy="21" r="1" />
+                            <circle cx="20" cy="21" r="1" />
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
+                          </svg>
+                          Add to Cart
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-              </Link>
-            ))}
+                  <div className="p-4 flex flex-col flex-1">
+                    <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
+                    <h3 className="text-sm font-semibold text-[#374151] mb-2 line-clamp-2 group-hover:text-[#2563eb] transition-colors">{p.name}</h3>
+                    <div className="mt-auto flex items-center justify-between">
+                      <div className="flex items-baseline gap-2">
+                        {salePrice ? (
+                          <>
+                            <span className="text-base font-bold text-[#111827]">PKR {Number(salePrice).toLocaleString()}</span>
+                            <span className="text-sm text-[#dc2626] line-through">PKR {Number(p.price).toLocaleString()}</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</span>
+                        )}
+                      </div>
+                      {p.stock > 0 && (
+                        <span className="text-[10px] text-[#16a34a] font-medium bg-[#f0fdf4] px-1.5 py-0.5 rounded">In Stock</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

@@ -8,47 +8,52 @@ const NAV_ITEMS = [
     label: 'WOMEN',
     href: '/products?gender=WOMEN',
     children: [
-      { label: 'Summer Collection', href: '/products?gender=WOMEN&category=summer-collection' },
-      { label: 'Co-ords', href: '/products?gender=WOMEN&category=co-ords' },
-      { label: 'Ready to Wear', href: '/products?gender=WOMEN&category=ready-to-wear' },
-      { label: 'Unstitched', href: '/products?gender=WOMEN&category=unstitched' },
-      { label: 'Formals', href: '/products?gender=WOMEN&category=formals' },
-      { label: 'Accessories', href: '/products?gender=WOMEN&category=accessories' },
+      { label: 'Summer Collection', href: '/products?gender=WOMEN&subcategory=summer-collection' },
+      { label: 'Co-ords', href: '/products?gender=WOMEN&subcategory=co-ords' },
+      { label: 'Ready to Wear', href: '/products?gender=WOMEN&subcategory=ready-to-wear' },
+      { label: 'Unstitched', href: '/products?gender=WOMEN&subcategory=unstitched' },
+      { label: 'Formals', href: '/products?gender=WOMEN&subcategory=formals' },
+      { label: 'Accessories', href: '/products?gender=WOMEN&subcategory=accessories' },
     ],
   },
   {
     label: 'MEN',
     href: '/products?gender=MEN',
     children: [
-      { label: 'Ready to Wear', href: '/products?gender=MEN&category=ready-to-wear' },
-      { label: 'Formals', href: '/products?gender=MEN&category=formals' },
-      { label: 'Co-ords', href: '/products?gender=MEN&category=co-ords' },
-      { label: 'Accessories', href: '/products?gender=MEN&category=accessories' },
+      { label: 'Ready to Wear', href: '/products?gender=MEN&subcategory=ready-to-wear' },
+      { label: 'Formals', href: '/products?gender=MEN&subcategory=formals' },
+      { label: 'Co-ords', href: '/products?gender=MEN&subcategory=co-ords' },
+      { label: 'Accessories', href: '/products?gender=MEN&subcategory=accessories' },
     ],
   },
   {
     label: 'ACCESSORIES',
-    href: '/products?gender=WOMEN&category=accessories',
+    href: '/products?gender=WOMEN&subcategory=accessories',
     children: [
-      { label: 'Women', href: '/products?gender=WOMEN&category=accessories' },
-      { label: 'Men', href: '/products?gender=MEN&category=accessories' },
+      { label: 'Women', href: '/products?gender=WOMEN&subcategory=accessories' },
+      { label: 'Men', href: '/products?gender=MEN&subcategory=accessories' },
     ],
   },
   {
     label: 'TEENS',
     href: '/products?gender=TEENS',
     children: [
-      { label: 'Girls', href: '/products?gender=TEENS&category=summer-collection' },
-      { label: 'Boys', href: '/products?gender=TEENS&category=ready-to-wear' },
+      { label: 'Girls', href: '/products?gender=TEENS&subcategory=summer-collection' },
+      { label: 'Boys', href: '/products?gender=TEENS&subcategory=ready-to-wear' },
     ],
   },
 ];
 
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const closeMobile = useCallback(() => setMobileMenuOpen(false), []);
+  const closeMobile = useCallback(() => {
+    setMobileMenuOpen(false);
+    setMobileExpanded(null);
+  }, []);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -66,6 +71,15 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       document.body.style.overflow = '';
     };
   }, [mobileMenuOpen, closeMobile]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery.trim())}`;
+      setSearchQuery('');
+      setSearchOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -95,6 +109,8 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
             <span className="hover:text-[#111827] cursor-pointer transition">Track Order</span>
             <span className="text-[#e5e7eb]">|</span>
             <span className="hover:text-[#111827] cursor-pointer transition">Help</span>
+            <span className="text-[#e5e7eb]">|</span>
+            <Link href="/admin" className="hover:text-[#111827] transition font-medium">Admin</Link>
           </div>
         </div>
       </div>
@@ -153,7 +169,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
@@ -165,6 +181,18 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 <path d="M21 21l-4.35-4.35"/>
               </svg>
             </button>
+
+            {/* Account */}
+            <Link
+              href="/admin"
+              className="hidden sm:flex w-9 h-9 rounded-xl items-center justify-center text-[#374151] hover:bg-[#f3f4f6] transition-colors"
+              aria-label="Admin panel"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </Link>
 
             {/* Cart */}
             <Link href="/products" className="w-9 h-9 rounded-xl flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] transition-colors relative" aria-label="Cart">
@@ -183,7 +211,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         {/* Search Bar */}
         <div className={`border-t border-[#f3f4f6] overflow-hidden transition-all duration-300 ${searchOpen ? 'max-h-20 py-4 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
@@ -191,10 +219,12 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
               <input
                 type="text"
                 placeholder="Search for products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full border border-[#d1d5db] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bfdbfe] focus:border-[#2563eb] transition"
                 autoFocus={searchOpen}
               />
-            </div>
+            </form>
           </div>
         </div>
       </header>
@@ -215,18 +245,53 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                 </svg>
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto py-4">
+
+            {/* Mobile Search */}
+            <div className="px-4 py-3 border-b border-[#f3f4f6]">
+              <form onSubmit={handleSearch} className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
+                />
+              </form>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto py-2">
               {NAV_ITEMS.map((item) => (
-                <div key={item.label} className="mb-1">
-                  <Link
-                    href={item.href}
-                    className="font-semibold text-sm block px-5 py-2.5 text-[#111827] hover:bg-[#f9fafb]"
-                    onClick={closeMobile}
-                  >
-                    {item.label}
-                  </Link>
-                  {item.children && (
-                    <div className="pl-8 space-y-0.5">
+                <div key={item.label} className="border-b border-[#f3f4f6]">
+                  <div className="flex items-center">
+                    <Link
+                      href={item.href}
+                      className="flex-1 font-semibold text-sm px-5 py-3 text-[#111827]"
+                      onClick={closeMobile}
+                    >
+                      {item.label}
+                    </Link>
+                    <button
+                      onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
+                      className="w-10 h-10 flex items-center justify-center text-[#9ca3af]"
+                      aria-label={`Expand ${item.label}`}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className={`transition-transform ${mobileExpanded === item.label ? 'rotate-180' : ''}`}
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                  {mobileExpanded === item.label && item.children && (
+                    <div className="pl-8 pb-2 space-y-0.5">
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
@@ -241,6 +306,17 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                   )}
                 </div>
               ))}
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-5 py-3 text-sm text-[#6b7280] hover:text-[#111827] hover:bg-[#f9fafb] transition"
+                onClick={closeMobile}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Admin Panel
+              </Link>
             </nav>
           </aside>
         </div>
@@ -254,6 +330,9 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 lg:py-16">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
             <div className="col-span-2 lg:col-span-1">
+              <Link href="/" className="inline-block mb-4">
+                <img src="/assets/logo.svg" alt="J." className="h-8 brightness-0 invert opacity-80" />
+              </Link>
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">CONTACT</h4>
               <div className="space-y-3 text-sm text-white/60">
                 <p className="flex items-center gap-2">
@@ -304,18 +383,18 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
             <div className="col-span-2 lg:col-span-1">
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">NEWSLETTER</h4>
               <p className="text-sm text-white/50 mb-3">Subscribe for updates and offers.</p>
-              <div className="flex">
+              <form onSubmit={(e) => e.preventDefault()} className="flex">
                 <input
                   type="email"
                   placeholder="Your email"
                   className="flex-1 bg-white/10 border border-white/20 px-3 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/40 transition rounded-l-lg min-w-0"
                 />
-                <button className="bg-[#2563eb] text-white px-4 py-2.5 hover:bg-[#1d4ed8] transition rounded-r-lg flex-shrink-0">
+                <button type="submit" className="bg-[#2563eb] text-white px-4 py-2.5 hover:bg-[#1d4ed8] transition rounded-r-lg flex-shrink-0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
                   </svg>
                 </button>
-              </div>
+              </form>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10">

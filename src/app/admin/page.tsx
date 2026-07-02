@@ -13,17 +13,54 @@ const ADMIN_KEY = 'admin-secret-key-2026';
 interface Product {
   id: number;
   name: string;
+  slug: string;
+  sku: string;
   category: string;
+  gender: string;
+  subcategory: string;
+  collection: string;
+  brand: string;
   stock: number;
   price: number;
-  image_url: string;
+  sale_price: number | null;
+  status: string;
+  visibility: string;
+  featured: number;
+  tags: string;
+  sizes: string;
+  colors: string;
+  materials: string;
+  weight: number;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords: string;
+  meta_title: string;
+  meta_description: string;
+  image_url?: string;
   created_at: string;
+  updated_at: string;
+  images?: Array<{
+    id: number;
+    product_id: number;
+    url: string;
+    alt: string;
+    type: string;
+    sort_order: number;
+    width: number;
+    height: number;
+    file_size: number;
+    created_at: string;
+  }>;
 }
 
 function getStatus(product: Product) {
   if (product.stock === 0) return { label: 'Out of Stock', variant: 'danger' as const };
   if (product.stock <= 5) return { label: 'Low Stock', variant: 'warning' as const };
   return { label: 'Active', variant: 'success' as const };
+}
+
+function formatPrice(price: number): string {
+  return `PKR ${Number(price).toLocaleString()}`;
 }
 
 export default function AdminDashboard() {
@@ -35,7 +72,13 @@ export default function AdminDashboard() {
       .then(async (r) => {
         const text = await r.text();
         if (!text) return [];
-        try { return JSON.parse(text); } catch { return []; }
+        try { 
+          const parsed = JSON.parse(text);
+          // Handle both old format (array) and new format ({ success: true, data: [...] })
+          if (Array.isArray(parsed)) return parsed;
+          if (parsed.data && Array.isArray(parsed.data)) return parsed.data;
+          return [];
+        } catch { return []; }
       })
       .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {})
@@ -55,7 +98,7 @@ export default function AdminDashboard() {
     { label: 'Total Products', value: stats.total, icon: '📦', bg: 'bg-[#eff6ff]', iconColor: 'text-[#2563eb]', sub: '+0 this month' },
     { label: 'Categories', value: stats.categories, icon: '🏷️', bg: 'bg-[#f0fdf4]', iconColor: 'text-[#16a34a]', sub: `${stats.categories} active` },
     { label: 'Total Stock', value: stats.stock, icon: '📊', bg: 'bg-[#fffbeb]', iconColor: 'text-[#d97706]', sub: `${stats.outOfStock} out of stock` },
-    { label: 'Inventory Value', value: `PKR ${stats.value.toLocaleString()}`, icon: '💰', bg: 'bg-[#fdf4ff]', iconColor: 'text-[#9333ea]', sub: `${stats.lowStock} low stock` },
+    { label: 'Inventory Value', value: formatPrice(stats.value), icon: '💰', bg: 'bg-[#fdf4ff]', iconColor: 'text-[#9333ea]', sub: `${stats.lowStock} low stock` },
   ];
 
   return (
@@ -215,12 +258,15 @@ export default function AdminDashboard() {
             <TableBody>
               {products.slice(0, 5).map((p) => {
                 const status = getStatus(p);
+                const primaryImg = p.images?.find(img => img.type === 'primary') || p.images?.[0];
                 return (
                   <TableRow key={p.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl bg-[#f3f4f6] overflow-hidden flex-shrink-0 border border-[#e5e7eb]">
-                          {p.image_url ? (
+                          {primaryImg?.url ? (
+                            <img src={primaryImg.url} alt="" className="w-full h-full object-cover" />
+                          ) : p.image_url ? (
                             <img src={p.image_url} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[#d1d5db] text-xs">—</div>
@@ -233,7 +279,7 @@ export default function AdminDashboard() {
                       <span className="text-[#6b7280]">{p.category || '—'}</span>
                     </TableCell>
                     <TableCell>
-                      <span className="font-semibold text-[#111827]">PKR {Number(p.price).toLocaleString()}</span>
+                      <span className="font-semibold text-[#111827]">{formatPrice(p.price)}</span>
                     </TableCell>
                     <TableCell>
                       <span className={p.stock <= 5 ? 'text-[#d97706] font-semibold' : 'text-[#6b7280]'}>{p.stock}</span>

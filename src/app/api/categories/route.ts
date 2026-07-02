@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
-import { CATEGORIES } from '@/lib/db';
+import { initDb, queryAll } from '@/lib/db';
 
 export async function GET() {
-  return NextResponse.json(CATEGORIES);
+  try {
+    await initDb();
+    const categories = queryAll('SELECT * FROM categories ORDER BY sort_order, name');
+    return NextResponse.json(categories);
+  } catch (error) {
+    console.error('GET /api/categories error:', error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
+  }
 }
