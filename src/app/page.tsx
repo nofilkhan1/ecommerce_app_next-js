@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import StorefrontLayout from './storefront-layout';
 
 const USER_KEY = 'user-secret-key-2026';
+const SALE_END = new Date('2026-07-03T00:00:00+05:00');
+const DISCOUNT = 0.70;
 
 interface ProductImage {
   id: number;
@@ -67,124 +69,167 @@ function getPrimaryImage(product: Product): string | null {
   return null;
 }
 
-function formatPrice(price: number, salePrice: number | null): string {
-  if (salePrice !== null && salePrice !== undefined && salePrice < price) {
-    return `<span class="text-base font-bold text-[#111827]">PKR ${Number(salePrice).toLocaleString()}</span> <span class="text-sm text-[#dc2626] line-through">PKR ${Number(price).toLocaleString()}</span>`;
-  }
-  return `PKR ${Number(price).toLocaleString()}`;
+function getDiscountedPrice(price: number): number {
+  return Math.round(price * (1 - DISCOUNT));
 }
 
-function getSalePrice(product: Product): number | null {
-  if (product.sale_price !== null && product.sale_price !== undefined && product.sale_price > 0 && product.sale_price < product.price) {
-    return product.sale_price;
-  }
-  return null;
+function useCountdown(target: Date) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = Math.max(0, target.getTime() - now);
+  return {
+    expired: diff <= 0,
+    hours: Math.floor(diff / 3600000),
+    minutes: Math.floor((diff % 3600000) / 60000),
+    seconds: Math.floor((diff % 60000) / 1000),
+  };
 }
 
 export default function HomePage() {
-  const [featured, setFeatured] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  const countdown = useCountdown(SALE_END);
 
   useEffect(() => {
-    fetch('/api/products?featured=true&limit=8', { headers: { 'X-API-Key': USER_KEY } })
+    fetch('/api/products?limit=20', { headers: { 'X-API-Key': USER_KEY } })
       .then(async (r) => {
         const text = await r.text();
-        if (!text) return { data: [] };
-        try { 
-          const parsed = JSON.parse(text);
-          return parsed.data || parsed; 
-        } catch { 
-          return { data: [] }; 
-        }
+        if (!text) return [];
+        try { const p = JSON.parse(text); return Array.isArray(p.data) ? p.data : []; } catch { return []; }
       })
-      .then((data) => { 
-        if (Array.isArray(data)) setFeatured(data); 
-        else if (data && Array.isArray(data.data)) setFeatured(data.data);
-      })
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {});
   }, []);
 
+  const displayProducts = showAll ? products : products.slice(0, 8);
+
   return (
     <StorefrontLayout>
-      {/* Hero Section */}
-      <section className="relative h-[60vh] lg:h-[80vh] bg-[#f3f4f6] overflow-hidden">
+      {/* FLASH SALE HERO */}
+      <section className="relative bg-[#111827] overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src="/images/categories/signature.jpg"
-            alt="Junaid Jamshed Collection"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          <img src="/images/categories/signature.jpg" alt="" className="w-full h-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#dc2626]/90 via-[#111827]/80 to-[#111827]/90" />
         </div>
-        <div className="relative z-10 h-full flex items-center max-w-[1400px] mx-auto px-4 lg:px-8">
-          <div className="max-w-lg">
-            <span className="inline-block bg-[#2563eb]/90 text-white text-[10px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-md mb-5">New Arrivals 2026</span>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1]" style={{ fontFamily: 'Libre Baskerville, serif' }}>
-              Summer Collection
-            </h1>
-            <p className="text-white/80 text-sm md:text-base mb-8 leading-relaxed max-w-md">
-              Discover the essence of elegance with our curated collection of premium fashion. Timeless designs for the modern wardrobe.
-            </p>
-            <div className="flex items-center gap-3">
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 bg-[#2563eb] text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-[#1d4ed8] transition-all duration-300 rounded-xl"
-            >
-              SHOP NOW
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link
-              href="/products?gender=WOMEN"
-              className="inline-flex items-center gap-2 border border-white/40 text-white px-6 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white/10 transition-all duration-300 rounded-xl"
-            >
-              VIEW CATALOG
-            </Link>
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-8 py-16 lg:py-24">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-[#dc2626] text-white text-[10px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 animate-pulse">
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                Limited Time Only
+              </div>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] mb-4" style={{ fontFamily: 'Libre Baskerville, serif' }}>
+                Flash Sale
+              </h1>
+              <div className="flex items-baseline gap-3 justify-center lg:justify-start mb-5">
+                <span className="text-6xl md:text-8xl font-extrabold text-[#dc2626]">70%</span>
+                <span className="text-2xl md:text-3xl font-bold text-white">OFF</span>
+              </div>
+              <p className="text-white/70 text-sm md:text-base mb-8 max-w-md mx-auto lg:mx-0">
+                On the entire collection. Premium fashion at unbeatable prices. Hurry, offer ends tonight!
+              </p>
+
+              {/* Countdown */}
+              {!countdown.expired ? (
+                <div className="flex items-center gap-3 justify-center lg:justify-start mb-8">
+                  {[
+                    { val: countdown.hours, label: 'HRS' },
+                    { val: countdown.minutes, label: 'MIN' },
+                    { val: countdown.seconds, label: 'SEC' },
+                  ].map((t, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl w-16 h-16 flex items-center justify-center">
+                          <span className="text-2xl font-bold text-white tabular-nums">{String(t.val).padStart(2, '0')}</span>
+                        </div>
+                        <span className="text-[9px] text-white/50 font-semibold tracking-wider mt-1.5">{t.label}</span>
+                      </div>
+                      {i < 2 && <span className="text-white/30 text-xl font-bold -mt-4">:</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mb-8">
+                  <span className="bg-[#dc2626]/20 border border-[#dc2626]/40 text-[#dc2626] text-xs font-bold px-4 py-2 rounded-full">
+                    Sale has ended
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 justify-center lg:justify-start">
+                <Link href="/products" className="inline-flex items-center gap-2 bg-white text-[#111827] px-8 py-3.5 text-xs font-bold tracking-[0.1em] hover:bg-[#f3f4f6] transition-all rounded-xl shadow-lg hover:shadow-xl">
+                  SHOP THE SALE
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link href="/products?gender=WOMEN" className="inline-flex items-center gap-2 border border-white/30 text-white px-6 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white/10 transition-all rounded-xl">
+                  VIEW CATALOG
+                </Link>
+              </div>
             </div>
+
+            {/* Featured sale item */}
+            {products.length > 0 && (
+              <div className="flex-shrink-0 hidden lg:block">
+                <div className="relative">
+                  <div className="absolute -top-4 -right-4 bg-[#dc2626] text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg z-10">
+                    70% OFF
+                  </div>
+                  <div className="w-72 h-80 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
+                    {getPrimaryImage(products[0]) ? (
+                      <img src={getPrimaryImage(products[0])!} alt={products[0].name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-white/10 flex items-center justify-center text-white/30 text-sm">No Image</div>
+                    )}
+                  </div>
+                  <div className="mt-3 text-center">
+                    <p className="text-white/60 text-[10px] tracking-wider uppercase">{products[0].name}</p>
+                    <p className="text-white font-bold text-sm mt-1">
+                      <span className="text-[#dc2626]">PKR {getDiscountedPrice(products[0].price).toLocaleString()}</span>
+                      <span className="text-white/40 line-through text-xs ml-2">PKR {products[0].price.toLocaleString()}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Category Grid */}
-      <section className="max-w-[1400px] mx-auto px-4 lg:px-8 py-16 lg:py-20">
-        <div className="text-center mb-12">
-          <span className="text-[10px] font-semibold text-[#2563eb] tracking-[0.2em] uppercase">Explore</span>
+      {/* Categories */}
+      <section className="max-w-[1400px] mx-auto px-4 lg:px-8 py-14 lg:py-18">
+        <div className="text-center mb-10">
+          <span className="text-[10px] font-semibold text-[#dc2626] tracking-[0.2em] uppercase">Shop Now</span>
           <h2 className="text-xl md:text-2xl font-bold tracking-[0.02em] text-[#111827] mt-2">Shop by Category</h2>
-          <div className="w-10 h-[2px] bg-[#2563eb] mx-auto mt-3 rounded-full" />
+          <div className="w-10 h-[2px] bg-[#dc2626] mx-auto mt-3 rounded-full" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
           {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.name}
-              href={cat.href}
-              className="group relative aspect-[3/4] overflow-hidden bg-[#f3f4f6] rounded-xl"
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+            <Link key={cat.name} href={cat.href} className="group relative aspect-[3/4] overflow-hidden bg-[#f3f4f6] rounded-xl">
+              <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p className="text-white text-[11px] font-bold tracking-[0.08em] text-center drop-shadow-sm">
-                  {cat.name}
-                </p>
+                <p className="text-white text-[11px] font-bold tracking-[0.08em] text-center drop-shadow-sm">{cat.name}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="bg-[#f9fafb] py-16 lg:py-20">
+      {/* Sale Products */}
+      <section className="bg-[#f9fafb] py-14 lg:py-18">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <span className="text-[10px] font-semibold text-[#2563eb] tracking-[0.2em] uppercase">Curated</span>
-              <h2 className="text-xl md:text-2xl font-bold tracking-[0.02em] text-[#111827] mt-2">Featured Products</h2>
-              <div className="w-8 h-[2px] bg-[#2563eb] mt-3 rounded-full" />
+              <span className="text-[10px] font-semibold text-[#dc2626] tracking-[0.2em] uppercase">70% Off</span>
+              <h2 className="text-xl md:text-2xl font-bold tracking-[0.02em] text-[#111827] mt-2">Flash Sale Picks</h2>
+              <div className="w-8 h-[2px] bg-[#dc2626] mt-3 rounded-full" />
             </div>
-            <Link href="/products" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition">
+            <Link href="/products" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#dc2626] hover:text-[#b91c1c] transition">
               VIEW ALL
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
@@ -192,28 +237,21 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {featured.length === 0 ? (
+          {displayProducts.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 rounded-2xl bg-[#eff6ff] flex items-center justify-center mx-auto mb-4">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
-              </div>
-              <p className="text-[#6b7280] text-sm font-medium">Our latest collection will be available shortly.</p>
-              <p className="text-[#9ca3af] text-xs mt-1">Check back soon for new arrivals.</p>
+              <p className="text-[#6b7280] text-sm font-medium">Loading sale items...</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-              {featured.map((p) => {
-                const primaryImage = getPrimaryImage(p);
-                const salePrice = getSalePrice(p);
+              {displayProducts.map((p) => {
+                const img = getPrimaryImage(p);
+                const salePrice = getDiscountedPrice(p.price);
+                const discount = Math.round(DISCOUNT * 100);
                 return (
                   <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                     <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
-                      {primaryImage ? (
-                        <img src={primaryImage} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      {img ? (
+                        <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
                           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -223,25 +261,23 @@ export default function HomePage() {
                           </svg>
                         </div>
                       )}
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">
+                          -{discount}%
+                        </span>
+                      </div>
                       {p.stock === 0 && (
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="bg-[#dc2626] text-white text-[10px] font-bold px-3 py-1 rounded-md">OUT OF STOCK</span>
                         </div>
                       )}
                     </div>
                     <div className="p-4">
-                      <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
-                      <p className="text-[10px] text-[#2563eb] mb-1 tracking-[0.05em] font-medium">{p.gender || ''}</p>
-                      <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#2563eb] transition-colors">{p.name}</p>
+                      <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.gender} &middot; {p.subcategory?.replace(/-/g, ' ')}</p>
+                      <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#dc2626] transition-colors">{p.name}</p>
                       <div className="flex items-baseline gap-2">
-                        {salePrice ? (
-                          <>
-                            <span className="text-base font-bold text-[#111827]">PKR {Number(salePrice).toLocaleString()}</span>
-                            <span className="text-sm text-[#dc2626] line-through">PKR {Number(p.price).toLocaleString()}</span>
-                          </>
-                        ) : (
-                          <span className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</span>
-                        )}
+                        <span className="text-base font-bold text-[#dc2626]">PKR {salePrice.toLocaleString()}</span>
+                        <span className="text-xs text-[#9ca3af] line-through">PKR {p.price.toLocaleString()}</span>
                       </div>
                     </div>
                   </Link>
@@ -250,9 +286,9 @@ export default function HomePage() {
             </div>
           )}
 
-          <div className="mt-8 text-center sm:hidden">
-            <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition">
-              VIEW ALL PRODUCTS
+          <div className="mt-8 text-center">
+            <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#dc2626] hover:text-[#b91c1c] transition">
+              VIEW ALL SALE ITEMS
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -261,31 +297,49 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Banner */}
-      <section className="relative h-[40vh] bg-[#111827] overflow-hidden">
+      {/* Trust Banner */}
+      <section className="border-y border-[#f3f4f6] bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5a2 2 0 01-2 2h-1M6 21a2 2 0 100-4 2 2 0 000 4zM17 21a2 2 0 100-4 2 2 0 000 4z"/></svg>, title: 'Free Delivery', desc: 'On orders above PKR 5,000' },
+              { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: 'Secure Payment', desc: '100% secure checkout' },
+              { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>, title: 'Premium Quality', desc: 'Authentic J. products' },
+              { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>, title: 'Easy Returns', desc: '30-day return policy' },
+            ].map((item) => (
+              <div key={item.title} className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#fef2f2] flex items-center justify-center">
+                  {item.icon}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#111827]">{item.title}</p>
+                  <p className="text-[11px] text-[#9ca3af]">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Banner */}
+      <section className="relative h-[35vh] min-h-[280px] bg-[#111827] overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src="/images/categories/luxe.jpg"
-            alt="Store"
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#111827]/80 to-[#111827]/40" />
+          <img src="/images/categories/luxe.jpg" alt="" className="w-full h-full object-cover opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#dc2626]/80 via-[#111827]/60 to-[#111827]/80" />
         </div>
         <div className="relative z-10 h-full flex items-center justify-center text-center px-4">
           <div>
-            <p className="text-white/60 text-[10px] tracking-[0.3em] mb-3 uppercase font-semibold">Experience</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Libre Baskerville, serif' }}>
-              Find a Store Near You
+            <p className="text-white/50 text-[10px] tracking-[0.3em] mb-3 uppercase font-semibold">Don&apos;t Miss Out</p>
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Libre Baskerville, serif' }}>
+              Sale Ends Tonight
             </h2>
-            <Link
-              href="#"
-              className="inline-flex items-center gap-2 border border-white/40 text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white hover:text-[#111827] transition-all duration-300 rounded-xl"
-            >
-              STORE LOCATOR
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
+            <p className="text-white/60 text-sm mb-6 max-w-md mx-auto">
+              Grab your favorites before the clock strikes midnight. All products at 70% off.
+            </p>
+            <Link href="/products" className="inline-flex items-center gap-2 bg-white text-[#111827] px-8 py-3.5 text-xs font-bold tracking-[0.1em] hover:bg-[#f3f4f6] transition-all rounded-xl shadow-lg">
+              SHOP NOW
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
           </div>

@@ -103,11 +103,12 @@ function formatPrice(price: number): string {
   return `PKR ${Number(price).toLocaleString()}`;
 }
 
-function getSalePrice(product: { price: number; sale_price: number | null }): number | null {
-  if (product.sale_price !== null && product.sale_price !== undefined && product.sale_price > 0 && product.sale_price < product.price) {
-    return product.sale_price;
-  }
-  return null;
+function getDiscountedPrice(price: number): number {
+  return Math.round(price * 0.30);
+}
+
+function getSalePrice(product: { price: number; sale_price: number | null }): number {
+  return getDiscountedPrice(product.price);
 }
 
 export default function ProductDetail() {
@@ -346,18 +347,12 @@ export default function ProductDetail() {
 
           {/* Price */}
           <div className="flex items-baseline gap-4 flex-wrap">
-            {salePrice ? (
-              <>
-                <span className="text-3xl font-bold text-[#111827]">{formatPrice(salePrice)}</span>
-                <span className="text-xl text-[#dc2626] line-through">{formatPrice(product.price)}</span>
-                <span className="inline-flex items-center gap-1.5 bg-[#fef2f2] text-[#dc2626] text-xs font-semibold px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full" />
-                  SALE
-                </span>
-              </>
-            ) : (
-              <span className="text-3xl font-bold text-[#111827]">{formatPrice(product.price)}</span>
-            )}
+            <span className="text-3xl font-bold text-[#dc2626]">{formatPrice(salePrice)}</span>
+            <span className="text-xl text-[#9ca3af] line-through">{formatPrice(product.price)}</span>
+            <span className="inline-flex items-center gap-1.5 bg-[#dc2626] text-white text-xs font-bold px-3 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 bg-white rounded-full" />
+              70% OFF
+            </span>
           </div>
 
           {/* Stock Status */}
@@ -553,14 +548,8 @@ export default function ProductDetail() {
                       <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.05em] uppercase">{p.category}</p>
                       <p className="text-sm font-medium text-[#374151] truncate mb-1">{p.name}</p>
                       <div className="flex items-baseline gap-2">
-                        {pSalePrice ? (
-                          <>
-                            <span className="text-sm font-bold text-[#111827]">{formatPrice(pSalePrice)}</span>
-                            <span className="text-xs text-[#dc2626] line-through">{formatPrice(p.price)}</span>
-                          </>
-                        ) : (
-                          <span className="text-sm font-bold text-[#111827]">{formatPrice(p.price)}</span>
-                        )}
+                        <span className="text-sm font-bold text-[#dc2626]">{formatPrice(pSalePrice)}</span>
+                        <span className="text-xs text-[#9ca3af] line-through">{formatPrice(p.price)}</span>
                       </div>
                     </div>
                   </Link>

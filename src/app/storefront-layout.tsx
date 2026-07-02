@@ -84,12 +84,14 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Announcement Bar */}
-      <div className="bg-[#111827] text-white text-center py-2 px-4 text-xs overflow-hidden">
+      <div className="bg-[#dc2626] text-white text-center py-2 px-4 text-xs overflow-hidden">
         <div className="announcement-marquee whitespace-nowrap inline-block">
-          <span className="mx-8">Flat 20% OFF on Summer Collection | Use Code: SUMMER20</span>
-          <span className="mx-8">Free Delivery on Orders Above PKR 5,000</span>
-          <span className="mx-8">Flat 20% OFF on Summer Collection | Use Code: SUMMER20</span>
-          <span className="mx-8">Free Delivery on Orders Above PKR 5,000</span>
+          <span className="mx-8 font-bold">FLASH SALE: 70% OFF ENTIRE STORE</span>
+          <span className="mx-8">Ends Tonight at Midnight!</span>
+          <span className="mx-8 font-bold">FREE DELIVERY on orders above PKR 5,000</span>
+          <span className="mx-8 font-bold">FLASH SALE: 70% OFF ENTIRE STORE</span>
+          <span className="mx-8">Ends Tonight at Midnight!</span>
+          <span className="mx-8 font-bold">FREE DELIVERY on orders above PKR 5,000</span>
         </div>
       </div>
 
