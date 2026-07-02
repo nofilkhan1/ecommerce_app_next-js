@@ -208,3 +208,18 @@ a {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* Sidebar slide in from left */
+@keyframes slide-in-left {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.25s ease-out;
+}
+
+/* Prevent body scroll when drawer open */
+body.drawer-open {
+  overflow: hidden;
+}

@@ -12,6 +12,7 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  stock: number;
 }
 
 const CATEGORIES = [
@@ -47,34 +48,46 @@ export default function HomePage() {
             alt="Junaid Jamshed Collection"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
         </div>
         <div className="relative z-10 h-full flex items-center max-w-[1400px] mx-auto px-4 lg:px-8">
           <div className="max-w-lg">
-            <p className="text-white/80 text-xs tracking-[0.3em] mb-4 uppercase">New Arrivals 2026</p>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight" style={{ fontFamily: 'Libre Baskerville, serif' }}>
+            <span className="inline-block bg-[#2563eb]/90 text-white text-[10px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-md mb-5">New Arrivals 2026</span>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1]" style={{ fontFamily: 'Libre Baskerville, serif' }}>
               Summer Collection
             </h1>
-            <p className="text-white/70 text-sm md:text-base mb-8 leading-relaxed">
-              Discover the essence of elegance with our curated collection of premium fashion.
+            <p className="text-white/80 text-sm md:text-base mb-8 leading-relaxed max-w-md">
+              Discover the essence of elegance with our curated collection of premium fashion. Timeless designs for the modern wardrobe.
             </p>
-            <Link
-              href="/products"
-              className="inline-block bg-[#2563eb] text-white px-8 py-3 text-xs font-semibold tracking-[0.1em] hover:bg-[#1d4ed8] transition-all duration-300 rounded-xl"
-            >
-              SHOP NOW
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 bg-[#2563eb] text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-[#1d4ed8] transition-all duration-300 rounded-xl"
+              >
+                SHOP NOW
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 border border-white/40 text-white px-6 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white/10 transition-all duration-300 rounded-xl"
+              >
+                VIEW CATALOG
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Category Grid */}
-      <section className="max-w-[1400px] mx-auto px-4 lg:px-8 py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-xl md:text-2xl font-bold tracking-[0.05em] text-[#111827]">SHOP BY CATEGORY</h2>
-          <div className="w-12 h-[2px] bg-[#2563eb] mx-auto mt-3 rounded-full" />
+      <section className="max-w-[1400px] mx-auto px-4 lg:px-8 py-16 lg:py-20">
+        <div className="text-center mb-12">
+          <span className="text-[10px] font-semibold text-[#2563eb] tracking-[0.2em] uppercase">Explore</span>
+          <h2 className="text-xl md:text-2xl font-bold tracking-[0.02em] text-[#111827] mt-2">Shop by Category</h2>
+          <div className="w-10 h-[2px] bg-[#2563eb] mx-auto mt-3 rounded-full" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.name}
@@ -84,11 +97,11 @@ export default function HomePage() {
               <img
                 src={cat.image}
                 alt={cat.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3">
-                <p className="text-white text-[11px] font-semibold tracking-[0.05em] text-center">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p className="text-white text-[11px] font-bold tracking-[0.08em] text-center drop-shadow-sm">
                   {cat.name}
                 </p>
               </div>
@@ -98,22 +111,26 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="bg-[#f9fafb] py-16">
+      <section className="bg-[#f9fafb] py-16 lg:py-20">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-end justify-between mb-10">
             <div>
-              <h2 className="text-xl md:text-2xl font-bold tracking-[0.05em] text-[#111827]">FEATURED PRODUCTS</h2>
-              <div className="w-12 h-[2px] bg-[#2563eb] mt-3 rounded-full" />
+              <span className="text-[10px] font-semibold text-[#2563eb] tracking-[0.2em] uppercase">Curated</span>
+              <h2 className="text-xl md:text-2xl font-bold tracking-[0.02em] text-[#111827] mt-2">Featured Products</h2>
+              <div className="w-8 h-[2px] bg-[#2563eb] mt-3 rounded-full" />
             </div>
-            <Link href="/products" className="text-xs font-semibold tracking-[0.05em] text-[#2563eb] hover:text-[#1d4ed8] transition border-b border-[#2563eb] hover:border-[#1d4ed8] pb-0.5">
+            <Link href="/products" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition">
               VIEW ALL
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </Link>
           </div>
 
           {featured.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-2xl bg-[#eff6ff] flex items-center justify-center mx-auto mb-4">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-20 h-20 rounded-2xl bg-[#eff6ff] flex items-center justify-center mx-auto mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                   <line x1="3" y1="6" x2="21" y2="6"/>
                   <path d="M16 10a4 4 0 01-8 0"/>
@@ -123,27 +140,45 @@ export default function HomePage() {
               <p className="text-[#9ca3af] text-xs mt-1">Check back soon for new arrivals.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
               {featured.map((p) => (
-                <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                  <div className="aspect-[3/4] bg-[#f3f4f6] overflow-hidden">
+                <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
                     {p.image_url ? (
                       <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#d1d5db] text-sm">
-                        No Image
+                      <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </div>
+                    )}
+                    {p.stock === 0 && (
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.05em] uppercase">{p.category}</p>
-                    <p className="text-sm font-medium text-[#374151] truncate mb-1">{p.name}</p>
-                    <p className="text-sm font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</p>
+                  <div className="p-4">
+                    <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
+                    <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#2563eb] transition-colors">{p.name}</p>
+                    <p className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
             </div>
           )}
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition">
+              VIEW ALL PRODUCTS
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -155,18 +190,24 @@ export default function HomePage() {
             alt="Store"
             className="w-full h-full object-cover opacity-40"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#111827]/80 to-[#111827]/40" />
         </div>
         <div className="relative z-10 h-full flex items-center justify-center text-center px-4">
           <div>
-            <p className="text-white/60 text-xs tracking-[0.3em] mb-3 uppercase">Visit Our Store</p>
+            <p className="text-white/60 text-[10px] tracking-[0.3em] mb-3 uppercase font-semibold">Experience</p>
             <h2 className="text-2xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Libre Baskerville, serif' }}>
               Find a Store Near You
             </h2>
             <Link
               href="#"
-              className="inline-block border border-white text-white px-8 py-3 text-xs font-semibold tracking-[0.1em] hover:bg-white hover:text-[#111827] transition-all duration-300 rounded-xl"
+              className="inline-flex items-center gap-2 border border-white/40 text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white hover:text-[#111827] transition-all duration-300 rounded-xl"
             >
               STORE LOCATOR
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
             </Link>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useCallback } from 'react';
+import { useSidebar } from './sidebar-context';
 
 const NAV_ITEMS = [
   {
@@ -77,6 +79,7 @@ const NAV_ITEMS = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { collapsed, toggleCollapsed } = useSidebar();
 
   const isActive = (item: typeof NAV_ITEMS[0]) => {
     if (item.href === '/admin' && item.label === 'Dashboard') return pathname === '/admin';
@@ -85,37 +88,59 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-white border-r border-[#e5e7eb] flex flex-col z-40">
-      {/* Logo */}
-      <div className="px-5 h-16 flex items-center border-b border-[#f3f4f6]">
-        <Link href="/admin" className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#2563eb] rounded-xl flex items-center justify-center shadow-sm">
+    <aside
+      className="hidden lg:flex fixed left-0 top-0 bottom-0 bg-white border-r border-[#e5e7eb] flex-col z-40"
+      style={{ width: collapsed ? 80 : 260, transition: 'width 0.25s ease' }}
+    >
+      {/* Logo + Toggle */}
+      <div className="px-4 h-16 flex items-center border-b border-[#f3f4f6] gap-3">
+        <Link href="/admin" className="flex items-center gap-3 overflow-hidden flex-shrink-0">
+          <div className="w-9 h-9 bg-[#2563eb] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
             <span className="text-white text-sm font-bold">J.</span>
           </div>
-          <div>
-            <span className="text-sm font-semibold text-[#111827]">Admin</span>
-            <span className="block text-[10px] text-[#9ca3af] font-medium">Dashboard</span>
-          </div>
+          {!collapsed && (
+            <div className="whitespace-nowrap">
+              <span className="text-sm font-semibold text-[#111827]">Admin</span>
+              <span className="block text-[10px] text-[#9ca3af] font-medium">Dashboard</span>
+            </div>
+          )}
         </Link>
+        <button
+          onClick={toggleCollapsed}
+          className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#374151] transition-colors flex-shrink-0 ml-auto"
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s ease' }}
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-        <p className="px-3 mb-2 text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest">Main Menu</p>
+        {!collapsed && (
+          <p className="px-3 mb-2 text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest">Main Menu</p>
+        )}
         {NAV_ITEMS.map((item) => {
           const active = isActive(item);
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+              title={collapsed ? item.label : undefined}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                collapsed ? 'justify-center' : ''
+              } ${
                 active
                   ? 'bg-[#eff6ff] text-[#2563eb]'
                   : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#111827]'
               }`}
             >
-              <span className={active ? 'text-[#2563eb]' : 'text-[#9ca3af]'}>{item.icon}</span>
-              {item.label}
+              <span className={`flex-shrink-0 ${active ? 'text-[#2563eb]' : 'text-[#9ca3af]'}`}>{item.icon}</span>
+              {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
             </Link>
           );
         })}
@@ -125,14 +150,17 @@ export default function AdminSidebar() {
       <div className="px-3 py-4 border-t border-[#f3f4f6] space-y-1">
         <Link
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#111827] transition-all duration-150"
+          title={collapsed ? 'View Store' : undefined}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#111827] transition-all duration-200 ${
+            collapsed ? 'justify-center' : ''
+          }`}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
             <polyline points="15 3 21 3 21 9" />
             <line x1="10" y1="14" x2="21" y2="3" />
           </svg>
-          View Store
+          {!collapsed && <span className="whitespace-nowrap">View Store</span>}
         </Link>
       </div>
     </aside>

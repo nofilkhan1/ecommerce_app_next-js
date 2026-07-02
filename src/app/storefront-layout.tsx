@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const NAV_ITEMS = [
   {
@@ -45,6 +45,25 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const closeMobile = useCallback(() => setMobileMenuOpen(false), []);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeMobile();
+        setSearchOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleKey);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen, closeMobile]);
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Announcement Bar */}
@@ -57,8 +76,8 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         </div>
       </div>
 
-      {/* Top Bar */}
-      <div className="border-b border-[#f3f4f6]">
+      {/* Top Bar - hidden on mobile */}
+      <div className="hidden md:block border-b border-[#f3f4f6]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-9 text-xs text-[#6b7280]">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1 cursor-pointer hover:text-[#111827] transition">
@@ -78,41 +97,47 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-[#f3f4f6]">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-16 lg:h-[72px]">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#f3f4f6]">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-between h-14 lg:h-[64px]">
           {/* Mobile Menu Toggle */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden flex items-center gap-2 text-sm font-medium"
+            onClick={() => setMobileMenuOpen(true)}
+            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl text-[#374151] hover:bg-[#f3f4f6] transition-colors"
+            aria-label="Open menu"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12h18M3 6h18M3 18h18"/>
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <img src="/assets/logo.svg" alt="J." className="h-8 lg:h-10" />
+            <img src="/assets/logo.svg" alt="J." className="h-7 lg:h-9" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden lg:flex items-center gap-6">
             {NAV_ITEMS.map((item) => (
               <div key={item.label} className="mega-menu-trigger relative group">
                 <Link
                   href={item.href}
-                  className="text-[13px] font-semibold tracking-[0.05em] text-[#374151] hover:text-[#6b7280] transition py-2"
+                  className="text-[12px] font-semibold tracking-[0.08em] text-[#374151] hover:text-[#2563eb] transition py-2 inline-flex items-center gap-1"
                 >
                   {item.label}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40 group-hover:opacity-100 transition">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
                 </Link>
                 {item.children && item.children.length > 0 && (
-                  <div className="mega-menu-content absolute top-full left-1/2 -translate-x-1/2 bg-white border border-[#f3f4f6] shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-5 min-w-[200px] z-50">
-                    <div className="space-y-2.5">
+                  <div className="mega-menu-content absolute top-full left-1/2 -translate-x-1/2 bg-white border border-[#f3f4f6] shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-4 min-w-[200px] z-50 rounded-xl mt-1">
+                    <div className="space-y-0.5">
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
                           href={child.href}
-                          className="block text-sm text-[#6b7280] hover:text-[#111827] transition"
+                          className="block text-sm text-[#6b7280] hover:text-[#111827] hover:bg-[#f9fafb] transition px-3 py-2 rounded-lg"
                         >
                           {child.label}
                         </Link>
@@ -125,23 +150,27 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {/* Search */}
-            <button onClick={() => setSearchOpen(!searchOpen)} className="text-[#374151] hover:text-[#6b7280] transition">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] transition-colors"
+              aria-label="Search"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="M21 21l-4.35-4.35"/>
               </svg>
             </button>
 
             {/* Cart */}
-            <Link href="/products" className="text-[#374151] hover:text-[#6b7280] transition relative">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <Link href="/products" className="w-9 h-9 rounded-xl flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] transition-colors relative" aria-label="Cart">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 01-8 0"/>
               </svg>
-              <span className="absolute -top-1.5 -right-2 bg-[#2563eb] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-0.5 -right-0.5 bg-[#2563eb] text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                 0
               </span>
             </Link>
@@ -149,51 +178,58 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         </div>
 
         {/* Search Bar */}
-        {searchOpen && (
-          <div className="border-t border-[#f3f4f6] py-4">
-            <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+        <div className={`border-t border-[#f3f4f6] overflow-hidden transition-all duration-300 ${searchOpen ? 'max-h-20 py-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <div className="relative">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
               <input
                 type="text"
                 placeholder="Search for products..."
-                className="w-full border border-[#d1d5db] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bfdbfe] focus:border-[#2563eb] transition"
-                autoFocus
+                className="w-full border border-[#d1d5db] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bfdbfe] focus:border-[#2563eb] transition"
+                autoFocus={searchOpen}
               />
             </div>
           </div>
-        )}
+        </div>
       </header>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-80 bg-white overflow-y-auto shadow-[4px_0_20px_rgba(0,0,0,0.1)]">
-            <div className="p-4 border-b border-[#f3f4f6] flex items-center justify-between">
-              <img src="/assets/logo.svg" alt="J." className="h-7" />
-              <button onClick={() => setMobileMenuOpen(false)} className="text-[#9ca3af] hover:text-[#111827]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12"/>
+        <div className="lg:hidden fixed inset-0 z-[60]">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeMobile} />
+          <aside className="absolute left-0 top-0 h-full w-[300px] bg-white shadow-[4px_0_24px_rgba(0,0,0,0.12)] flex flex-col animate-slide-in-left">
+            <div className="px-4 h-14 flex items-center border-b border-[#f3f4f6] gap-3">
+              <Link href="/" className="flex items-center gap-2.5" onClick={closeMobile}>
+                <img src="/assets/logo.svg" alt="J." className="h-7" />
+              </Link>
+              <button onClick={closeMobile} className="ml-auto w-8 h-8 rounded-lg flex items-center justify-center text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#374151] transition-colors" aria-label="Close menu">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
-            <div className="p-4">
+            <nav className="flex-1 overflow-y-auto py-4">
               {NAV_ITEMS.map((item) => (
-                <div key={item.label} className="mb-4">
+                <div key={item.label} className="mb-1">
                   <Link
                     href={item.href}
-                    className="font-semibold text-sm block py-2 text-[#111827]"
-                    onClick={() => setMobileMenuOpen(false)}
+                    className="font-semibold text-sm block px-5 py-2.5 text-[#111827] hover:bg-[#f9fafb]"
+                    onClick={closeMobile}
                   >
                     {item.label}
                   </Link>
                   {item.children && (
-                    <div className="pl-4 space-y-2">
+                    <div className="pl-8 space-y-0.5">
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
                           href={child.href}
-                          className="text-sm text-[#6b7280] block py-1 hover:text-[#111827] transition"
-                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm text-[#6b7280] block py-2 px-3 hover:text-[#111827] hover:bg-[#f9fafb] rounded-lg transition"
+                          onClick={closeMobile}
                         >
                           {child.label}
                         </Link>
@@ -202,8 +238,8 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                   )}
                 </div>
               ))}
-            </div>
-          </div>
+            </nav>
+          </aside>
         </div>
       )}
 
@@ -212,8 +248,8 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
 
       {/* Footer */}
       <footer className="bg-[#111827] text-white mt-auto">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 lg:py-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
             <div className="col-span-2 lg:col-span-1">
               <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">CONTACT</h4>
               <div className="space-y-3 text-sm text-white/60">
@@ -263,14 +299,15 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
               </ul>
             </div>
             <div className="col-span-2 lg:col-span-1">
-              <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">SIGN UP FOR NEWSLETTER</h4>
+              <h4 className="font-bold text-xs mb-4 tracking-[0.1em] text-white/80">NEWSLETTER</h4>
+              <p className="text-sm text-white/50 mb-3">Subscribe for updates and offers.</p>
               <div className="flex">
                 <input
                   type="email"
-                  placeholder="EMAIL ADDRESS"
-                  className="flex-1 bg-white/10 border border-white/20 px-3 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/40 transition rounded-l-lg"
+                  placeholder="Your email"
+                  className="flex-1 bg-white/10 border border-white/20 px-3 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/40 transition rounded-l-lg min-w-0"
                 />
-                <button className="bg-[#2563eb] text-white px-4 py-2.5 hover:bg-[#1d4ed8] transition rounded-r-lg">
+                <button className="bg-[#2563eb] text-white px-4 py-2.5 hover:bg-[#1d4ed8] transition rounded-r-lg flex-shrink-0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
                   </svg>
