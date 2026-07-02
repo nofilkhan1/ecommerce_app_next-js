@@ -14,15 +14,31 @@ import { useToast } from '@/components/ui/toast';
 const ADMIN_KEY = 'admin-secret-key-2026';
 const API = '/api/products';
 
-const CATEGORIES = [
-  { value: '', label: 'Select category...' },
-  { value: 'SUMMER COLLECTION', label: 'Summer Collection' },
-  { value: 'CO-ORDS', label: 'Co-ords' },
-  { value: 'READY TO WEAR', label: 'Ready to Wear' },
-  { value: 'UNSTITCHED', label: 'Unstitched' },
-  { value: 'FORMALS', label: 'Formals' },
-  { value: 'ACCESSORIES', label: 'Accessories' },
+const GENDERS = [
+  { value: '', label: 'Select gender...' },
+  { value: 'WOMEN', label: 'Women' },
+  { value: 'MEN', label: 'Men' },
+  { value: 'TEENS', label: 'Teens' },
 ];
+
+const SUBCATEGORIES = [
+  { value: '', label: 'Select subcategory...' },
+  { value: 'summer-collection', label: 'Summer Collection' },
+  { value: 'co-ords', label: 'Co-ords' },
+  { value: 'ready-to-wear', label: 'Ready to Wear' },
+  { value: 'unstitched', label: 'Unstitched' },
+  { value: 'formals', label: 'Formals' },
+  { value: 'accessories', label: 'Accessories' },
+];
+
+const CATEGORY_DISPLAY: Record<string, string> = {
+  'summer-collection': 'SUMMER COLLECTION',
+  'co-ords': 'CO-ORDS',
+  'ready-to-wear': 'READY TO WEAR',
+  'unstitched': 'UNSTITCHED',
+  'formals': 'FORMALS',
+  'accessories': 'ACCESSORIES',
+};
 
 interface Product {
   id: number;
@@ -30,6 +46,8 @@ interface Product {
   description: string;
   price: number;
   category: string;
+  gender: string;
+  subcategory: string;
   image_url: string;
   stock: number;
   created_at: string;
@@ -46,6 +64,8 @@ interface FormData {
   sku: string;
   barcode: string;
   category: string;
+  gender: string;
+  subcategory: string;
   brand: string;
   tags: string;
   image_url: string;
@@ -56,7 +76,7 @@ interface FormData {
 
 const EMPTY_FORM: FormData = {
   name: '', description: '', price: '', discount: '', tax: '',
-  stock: '0', sku: '', barcode: '', category: '', brand: '', tags: '',
+  stock: '0', sku: '', barcode: '', category: '', gender: '', subcategory: '', brand: '', tags: '',
   image_url: '', slug: '', meta_title: '', meta_description: '',
 };
 
@@ -122,11 +142,12 @@ export default function AdminProducts() {
   let filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.category || '').toLowerCase().includes(search.toLowerCase())
+      (p.category || '').toLowerCase().includes(search.toLowerCase()) ||
+      (p.gender || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (filterCategory) {
-    filtered = filtered.filter((p) => p.category === filterCategory);
+    filtered = filtered.filter((p) => p.subcategory === filterCategory);
   }
 
   if (sortBy === 'newest') filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
@@ -154,6 +175,8 @@ export default function AdminProducts() {
       sku: '',
       barcode: '',
       category: p.category,
+      gender: p.gender || '',
+      subcategory: p.subcategory || '',
       brand: '',
       tags: '',
       image_url: p.image_url,
@@ -186,7 +209,9 @@ export default function AdminProducts() {
       description: form.description.trim(),
       price: parseFloat(form.price),
       stock: parseInt(form.stock) || 0,
-      category: form.category.trim(),
+      category: CATEGORY_DISPLAY[form.subcategory] || form.subcategory.trim(),
+      gender: form.gender.trim(),
+      subcategory: form.subcategory.trim(),
       image_url: form.image_url.trim(),
     };
 
@@ -277,7 +302,7 @@ export default function AdminProducts() {
               className="px-3.5 py-2.5 text-sm bg-white border border-[#d1d5db] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#bfdbfe] focus:border-[#2563eb] transition-all cursor-pointer"
             >
               <option value="">All Categories</option>
-              {CATEGORIES.filter((c) => c.value).map((c) => (
+              {SUBCATEGORIES.filter((c) => c.value).map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
@@ -474,12 +499,18 @@ export default function AdminProducts() {
           {/* Organization */}
           <div>
             <h3 className="text-xs font-semibold text-[#6b7280] uppercase tracking-widest mb-4">Organization</h3>
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-3 gap-5">
               <Select
-                label="Category"
-                value={form.category}
-                onChange={(e) => updateForm('category', e.target.value)}
-                options={CATEGORIES}
+                label="Gender"
+                value={form.gender}
+                onChange={(e) => updateForm('gender', e.target.value)}
+                options={GENDERS}
+              />
+              <Select
+                label="Subcategory"
+                value={form.subcategory}
+                onChange={(e) => updateForm('subcategory', e.target.value)}
+                options={SUBCATEGORIES}
               />
               <Input
                 label="Brand"

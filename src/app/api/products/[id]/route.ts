@@ -55,7 +55,7 @@ export async function PUT(
     const fields: string[] = [];
     const values: unknown[] = [];
 
-    for (const key of ['name', 'description', 'price', 'category', 'image_url', 'stock'] as const) {
+    for (const key of ['name', 'description', 'price', 'category', 'gender', 'subcategory', 'image_url', 'stock'] as const) {
       if (body[key] !== undefined) {
         if (key === 'price') {
           const parsed = Number(body[key]);

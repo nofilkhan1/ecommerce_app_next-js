@@ -16,12 +16,12 @@ interface Product {
 }
 
 const CATEGORIES = [
-  { name: 'SUMMER COLLECTION', image: '/images/categories/summer.jpg' },
-  { name: 'CO-ORDS', image: '/images/categories/coords.jpg' },
-  { name: 'READY TO WEAR', image: '/images/categories/women-1.jpg' },
-  { name: 'UNSTITCHED', image: '/images/categories/unstitched.jpg' },
-  { name: 'FORMALS', image: '/images/categories/formal.jpg' },
-  { name: 'ACCESSORIES', image: '/images/categories/accessories.jpg' },
+  { name: "Women's Summer", href: '/products?gender=WOMEN&category=summer-collection', image: '/images/categories/summer.jpg' },
+  { name: "Women's Co-ords", href: '/products?gender=WOMEN&category=co-ords', image: '/images/categories/coords.jpg' },
+  { name: "Women's Ready to Wear", href: '/products?gender=WOMEN&category=ready-to-wear', image: '/images/categories/women-1.jpg' },
+  { name: "Men's Ready to Wear", href: '/products?gender=MEN&category=ready-to-wear', image: '/images/categories/men-1.jpg' },
+  { name: "Women's Unstitched", href: '/products?gender=WOMEN&category=unstitched', image: '/images/categories/unstitched.jpg' },
+  { name: "Accessories", href: '/products?gender=WOMEN&category=accessories', image: '/images/categories/accessories.jpg' },
 ];
 
 export default function HomePage() {
@@ -60,21 +60,21 @@ export default function HomePage() {
               Discover the essence of elegance with our curated collection of premium fashion. Timeless designs for the modern wardrobe.
             </p>
             <div className="flex items-center gap-3">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 bg-[#2563eb] text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-[#1d4ed8] transition-all duration-300 rounded-xl"
-              >
-                SHOP NOW
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 border border-white/40 text-white px-6 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white/10 transition-all duration-300 rounded-xl"
-              >
-                VIEW CATALOG
-              </Link>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-[#2563eb] text-white px-8 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-[#1d4ed8] transition-all duration-300 rounded-xl"
+            >
+              SHOP NOW
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+            <Link
+              href="/products?gender=WOMEN"
+              className="inline-flex items-center gap-2 border border-white/40 text-white px-6 py-3.5 text-xs font-semibold tracking-[0.1em] hover:bg-white/10 transition-all duration-300 rounded-xl"
+            >
+              VIEW CATALOG
+            </Link>
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function HomePage() {
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.name}
-              href={`/products?category=${encodeURIComponent(cat.name)}`}
+              href={cat.href}
               className="group relative aspect-[3/4] overflow-hidden bg-[#f3f4f6] rounded-xl"
             >
               <img
@@ -163,6 +163,7 @@ export default function HomePage() {
                   </div>
                   <div className="p-4">
                     <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
+                    <p className="text-[10px] text-[#2563eb] mb-1 tracking-[0.05em] font-medium">{(p as any).gender || ''}</p>
                     <p className="text-sm font-semibold text-[#374151] truncate mb-2 group-hover:text-[#2563eb] transition-colors">{p.name}</p>
                     <p className="text-base font-bold text-[#111827]">PKR {Number(p.price).toLocaleString()}</p>
                   </div>

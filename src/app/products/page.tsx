@@ -13,29 +13,54 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  gender: string;
+  subcategory: string;
   stock: number;
 }
 
-const ALL_CATEGORIES = [
-  'SUMMER COLLECTION',
-  'CO-ORDS',
-  'READY TO WEAR',
-  'UNSTITCHED',
-  'FORMALS',
-  'ACCESSORIES',
-];
+const GENDER_CATEGORIES: Record<string, { label: string; slug: string }[]> = {
+  WOMEN: [
+    { label: 'All', slug: '' },
+    { label: 'Summer Collection', slug: 'summer-collection' },
+    { label: 'Co-ords', slug: 'co-ords' },
+    { label: 'Ready to Wear', slug: 'ready-to-wear' },
+    { label: 'Unstitched', slug: 'unstitched' },
+    { label: 'Formals', slug: 'formals' },
+    { label: 'Accessories', slug: 'accessories' },
+  ],
+  MEN: [
+    { label: 'All', slug: '' },
+    { label: 'Ready to Wear', slug: 'ready-to-wear' },
+    { label: 'Formals', slug: 'formals' },
+    { label: 'Co-ords', slug: 'co-ords' },
+    { label: 'Accessories', slug: 'accessories' },
+  ],
+  TEENS: [
+    { label: 'All', slug: '' },
+    { label: 'Girls', slug: 'summer-collection' },
+    { label: 'Boys', slug: 'ready-to-wear' },
+  ],
+};
+
+const GENDER_LABELS: Record<string, string> = {
+  WOMEN: "Women's Collection",
+  MEN: "Men's Collection",
+  TEENS: "Teens Collection",
+};
 
 function ProductGrid() {
   const searchParams = useSearchParams();
-  const categoryFilter = searchParams.get('category');
+  const gender = searchParams.get('gender') || '';
+  const categoryFilter = searchParams.get('category') || '';
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
-    const url = categoryFilter
-      ? `/api/products?category=${encodeURIComponent(categoryFilter)}`
-      : '/api/products';
+    const params = new URLSearchParams();
+    if (gender) params.set('gender', gender);
+    if (categoryFilter) params.set('category', categoryFilter);
+    const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
     fetch(url, { headers: { 'X-API-Key': USER_KEY } })
       .then(async (r) => {
         const text = await r.text();
@@ -44,7 +69,7 @@ function ProductGrid() {
       })
       .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {});
-  }, [categoryFilter]);
+  }, [gender, categoryFilter]);
 
   let filtered = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -55,45 +80,65 @@ function ProductGrid() {
   else if (sortBy === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
   else filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
 
+  const pageTitle = gender ? (GENDER_LABELS[gender] || 'All Products') : 'All Products';
+  const categories = gender ? (GENDER_CATEGORIES[gender] || []) : [];
+
   return (
     <div>
-      {/* Page Header */}
-      <div className="bg-[#f9fafb] border-b border-[#f3f4f6] py-12 text-center">
+      <div className="bg-[#f9fafb] border-b border-[#f3f4f6] py-10 text-center">
         <h1 className="text-2xl md:text-3xl font-bold tracking-[0.02em] text-[#111827]" style={{ fontFamily: 'Libre Baskerville, serif' }}>
-          {categoryFilter || 'ALL PRODUCTS'}
+          {pageTitle}
         </h1>
         <div className="w-10 h-[2px] bg-[#2563eb] mx-auto mt-3 rounded-full" />
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
-        {/* Filters Bar */}
         <div className="flex flex-col gap-4 mb-8">
-          {/* Category Pills */}
+          {/* Gender Tabs */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
               href="/products"
               className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${
-                !categoryFilter
-                  ? 'bg-[#2563eb] text-white border-[#2563eb] shadow-sm'
-                  : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#2563eb] hover:text-[#2563eb]'
+                !gender
+                  ? 'bg-[#111827] text-white border-[#111827] shadow-sm'
+                  : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#111827] hover:text-[#111827]'
               }`}
             >
               ALL
             </Link>
-            {ALL_CATEGORIES.map((cat) => (
+            {['WOMEN', 'MEN', 'TEENS'].map((g) => (
               <Link
-                key={cat}
-                href={`/products?category=${encodeURIComponent(cat)}`}
+                key={g}
+                href={`/products?gender=${g}`}
                 className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${
-                  categoryFilter === cat
-                    ? 'bg-[#2563eb] text-white border-[#2563eb] shadow-sm'
-                    : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#2563eb] hover:text-[#2563eb]'
+                  gender === g
+                    ? 'bg-[#111827] text-white border-[#111827] shadow-sm'
+                    : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#111827] hover:text-[#111827]'
                 }`}
               >
-                {cat}
+                {g}
               </Link>
             ))}
           </div>
+
+          {/* Subcategory Pills */}
+          {categories.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={cat.slug ? `/products?gender=${gender}&category=${cat.slug}` : `/products?gender=${gender}`}
+                  className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${
+                    categoryFilter === cat.slug
+                      ? 'bg-[#2563eb] text-white border-[#2563eb] shadow-sm'
+                      : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#2563eb] hover:text-[#2563eb]'
+                  }`}
+                >
+                  {cat.label}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -128,7 +173,6 @@ function ProductGrid() {
           </div>
         </div>
 
-        {/* Product Grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-2xl bg-[#f3f4f6] flex items-center justify-center mx-auto mb-4">
@@ -170,22 +214,14 @@ function ProductGrid() {
                       </svg>
                     </div>
                   )}
-
-                  {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                     {p.stock === 0 && (
-                      <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">
-                        OUT OF STOCK
-                      </span>
+                      <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">OUT OF STOCK</span>
                     )}
                     {p.stock > 0 && p.stock <= 5 && (
-                      <span className="bg-[#d97706] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">
-                        LOW STOCK
-                      </span>
+                      <span className="bg-[#d97706] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">LOW STOCK</span>
                     )}
                   </div>
-
-                  {/* Quick Add Button */}
                   {p.stock > 0 && (
                     <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200">
                       <button className="w-full bg-white/95 backdrop-blur-sm text-[#111827] py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-white transition-colors">
@@ -199,7 +235,6 @@ function ProductGrid() {
                     </div>
                   )}
                 </div>
-
                 <div className="p-4 flex flex-col flex-1">
                   <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.category}</p>
                   <h3 className="text-sm font-semibold text-[#374151] mb-2 line-clamp-2 group-hover:text-[#2563eb] transition-colors">{p.name}</h3>

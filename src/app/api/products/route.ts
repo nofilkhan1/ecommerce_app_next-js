@@ -12,11 +12,22 @@ export async function GET(request: NextRequest) {
     await initDb();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const gender = searchParams.get('gender');
 
-    const rows = category
-      ? queryAll('SELECT * FROM products WHERE category = ? ORDER BY created_at DESC', [category])
-      : queryAll('SELECT * FROM products ORDER BY created_at DESC');
+    let sql = 'SELECT * FROM products WHERE 1=1';
+    const params: unknown[] = [];
 
+    if (gender) {
+      sql += ' AND gender = ?';
+      params.push(gender);
+    }
+    if (category) {
+      sql += ' AND subcategory = ?';
+      params.push(category);
+    }
+    sql += ' ORDER BY created_at DESC';
+
+    const rows = queryAll(sql, params);
     return NextResponse.json(rows);
   } catch (error) {
     console.error('GET /api/products error:', error);
@@ -40,7 +51,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid or empty request body' }, { status: 400 });
     }
 
-    const { name, description, price, category, image_url, stock } = body;
+    const { name, description, price, category, gender, subcategory, image_url, stock } = body;
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ success: false, message: 'Product name is required' }, { status: 400 });
@@ -57,13 +68,15 @@ export async function POST(request: NextRequest) {
     }
 
     const sanitizedCategory = typeof category === 'string' ? category.trim() : '';
+    const sanitizedGender = typeof gender === 'string' ? gender.trim() : '';
+    const sanitizedSubcategory = typeof subcategory === 'string' ? subcategory.trim() : '';
     const sanitizedDescription = typeof description === 'string' ? description.trim() : '';
     const sanitizedImageUrl = typeof image_url === 'string' ? image_url.trim() : '';
 
     execute(
-      `INSERT INTO products (name, description, price, category, image_url, stock)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [name.trim(), sanitizedDescription, parsedPrice, sanitizedCategory, sanitizedImageUrl, parsedStock]
+      `INSERT INTO products (name, description, price, category, gender, subcategory, image_url, stock)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name.trim(), sanitizedDescription, parsedPrice, sanitizedCategory, sanitizedGender, sanitizedSubcategory, sanitizedImageUrl, parsedStock]
     );
 
     const rows = queryAll('SELECT * FROM products ORDER BY id DESC LIMIT 1');

@@ -6,37 +6,40 @@ import { useState, useEffect, useCallback } from 'react';
 const NAV_ITEMS = [
   {
     label: 'WOMEN',
-    href: '/products',
+    href: '/products?gender=WOMEN',
     children: [
-      { label: 'Summer Collection', href: '/products?category=SUMMER+COLLECTION' },
-      { label: 'Co-ords', href: '/products?category=CO-ORDS' },
-      { label: 'Ready to Wear', href: '/products?category=READY+TO+WEAR' },
-      { label: 'Unstitched', href: '/products?category=UNSTITCHED' },
+      { label: 'Summer Collection', href: '/products?gender=WOMEN&category=summer-collection' },
+      { label: 'Co-ords', href: '/products?gender=WOMEN&category=co-ords' },
+      { label: 'Ready to Wear', href: '/products?gender=WOMEN&category=ready-to-wear' },
+      { label: 'Unstitched', href: '/products?gender=WOMEN&category=unstitched' },
+      { label: 'Formals', href: '/products?gender=WOMEN&category=formals' },
+      { label: 'Accessories', href: '/products?gender=WOMEN&category=accessories' },
     ],
   },
   {
     label: 'MEN',
-    href: '/products',
+    href: '/products?gender=MEN',
     children: [
-      { label: 'Ready to Wear', href: '/products?category=READY+TO+WEAR' },
-      { label: 'Formals', href: '/products?category=FORMALS' },
-      { label: 'Co-ords', href: '/products?category=CO-ORDS' },
+      { label: 'Ready to Wear', href: '/products?gender=MEN&category=ready-to-wear' },
+      { label: 'Formals', href: '/products?gender=MEN&category=formals' },
+      { label: 'Co-ords', href: '/products?gender=MEN&category=co-ords' },
+      { label: 'Accessories', href: '/products?gender=MEN&category=accessories' },
     ],
   },
   {
-    label: 'FRAGRANCE & BEAUTY',
-    href: '/products?category=ACCESSORIES',
+    label: 'ACCESSORIES',
+    href: '/products?gender=WOMEN&category=accessories',
     children: [
-      { label: 'Fragrances', href: '/products?category=ACCESSORIES' },
-      { label: 'Skincare', href: '/products?category=ACCESSORIES' },
+      { label: 'Women', href: '/products?gender=WOMEN&category=accessories' },
+      { label: 'Men', href: '/products?gender=MEN&category=accessories' },
     ],
   },
   {
     label: 'TEENS',
-    href: '/products',
+    href: '/products?gender=TEENS',
     children: [
-      { label: 'Girls', href: '/products?category=SUMMER+COLLECTION' },
-      { label: 'Boys', href: '/products?category=READY+TO+WEAR' },
+      { label: 'Girls', href: '/products?gender=TEENS&category=summer-collection' },
+      { label: 'Boys', href: '/products?gender=TEENS&category=ready-to-wear' },
     ],
   },
 ];

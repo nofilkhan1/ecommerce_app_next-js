@@ -86,12 +86,22 @@ export async function initDb(): Promise<void> {
       description TEXT DEFAULT '',
       price REAL NOT NULL,
       category TEXT DEFAULT '',
+      gender TEXT DEFAULT '',
+      subcategory TEXT DEFAULT '',
       image_url TEXT DEFAULT '',
       stock INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     )
   `);
+
+  const cols = queryAll("PRAGMA table_info(products)").map((c: Record<string, unknown>) => c.name);
+  if (!cols.includes('gender')) {
+    db.run("ALTER TABLE products ADD COLUMN gender TEXT DEFAULT ''");
+  }
+  if (!cols.includes('subcategory')) {
+    db.run("ALTER TABLE products ADD COLUMN subcategory TEXT DEFAULT ''");
+  }
   saveDb();
 }
 
