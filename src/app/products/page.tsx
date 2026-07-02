@@ -137,8 +137,8 @@ function ProductGrid() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-[#dc2626] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-[#6b7280]">Loading products...</p>
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-[13px] text-text-muted">Loading products...</p>
         </div>
       </div>
     );
@@ -147,26 +147,27 @@ function ProductGrid() {
   return (
     <div>
       {/* Page Header */}
-      <div className="bg-[#111827] py-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#dc2626]/20 border border-[#dc2626]/40 text-[#dc2626] text-[10px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-4">
-          <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full animate-pulse" />
+      <div className="bg-text-primary py-10 lg:py-14 text-center">
+        <div className="inline-flex items-center gap-2 bg-sale/20 border border-sale/40 text-sale text-[10px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-4">
+          <span className="w-1.5 h-1.5 bg-sale rounded-full animate-pulse" />
           Flash Sale &mdash; 70% Off Everything
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-[0.02em] text-white" style={{ fontFamily: 'Libre Baskerville, serif' }}>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-baskerville">
           {pageTitle}
         </h1>
-        <div className="w-10 h-[2px] bg-[#dc2626] mx-auto mt-3 rounded-full" />
+        <div className="w-10 h-[2px] bg-sale mx-auto mt-3 rounded-full" />
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
+        {/* Filter Bar */}
         <div className="flex flex-col gap-4 mb-8">
           {/* Gender Tabs */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Link href="/products" className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${!gender ? 'bg-[#111827] text-white border-[#111827] shadow-sm' : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#111827] hover:text-[#111827]'}`}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/products" className={`chip ${!gender ? 'chip-active' : ''}`}>
               ALL
             </Link>
             {['WOMEN', 'MEN', 'TEENS'].map((g) => (
-              <Link key={g} href={`/products?gender=${g}`} className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${gender === g ? 'bg-[#111827] text-white border-[#111827] shadow-sm' : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#111827] hover:text-[#111827]'}`}>
+              <Link key={g} href={`/products?gender=${g}`} className={`chip ${gender === g ? 'chip-active' : ''}`}>
                 {g}
               </Link>
             ))}
@@ -174,28 +175,42 @@ function ProductGrid() {
 
           {/* Subcategory Pills */}
           {categories.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {categories.map((cat) => (
-                <Link key={cat.slug} href={cat.slug ? `/products?gender=${gender}&subcategory=${cat.slug}` : `/products?gender=${gender}`} className={`px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.05em] border transition-all rounded-lg ${categoryFilter === cat.slug ? 'bg-[#dc2626] text-white border-[#dc2626] shadow-sm' : 'bg-white text-[#374151] border-[#d1d5db] hover:border-[#dc2626] hover:text-[#dc2626]'}`}>
+                <Link key={cat.slug} href={cat.slug ? `/products?gender=${gender}&subcategory=${cat.slug}` : `/products?gender=${gender}`} className={`chip ${categoryFilter === cat.slug ? 'chip-sale' : ''}`}>
                   {cat.label}
                 </Link>
               ))}
             </div>
           )}
 
-          {/* Search + Sort */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <p className="text-sm text-[#6b7280]">
-              Showing <span className="font-semibold text-[#111827]">{filtered.length}</span> product{filtered.length !== 1 ? 's' : ''} &middot; <span className="text-[#dc2626] font-semibold">70% OFF</span>
-            </p>
+          {/* Toolbar: Count + Filters | Search + Sort */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-3">
+              <p className="text-[13px] text-text-muted">
+                Showing <span className="font-semibold text-text-primary">{filtered.length}</span> product{filtered.length !== 1 ? 's' : ''}
+              </p>
+              <span className="badge badge-sale">70% OFF</span>
+            </div>
+            <div className="flex items-center gap-2">
               <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-text-faint" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
                 </svg>
-                <input type="text" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-4 py-2 text-sm border border-[#d1d5db] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fecaca] focus:border-[#dc2626] transition w-full sm:w-[240px]" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="toolbar-input"
+                  style={{ width: '220px' }}
+                />
               </div>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 text-sm border border-[#d1d5db] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fecaca] focus:border-[#dc2626] transition cursor-pointer bg-white">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="toolbar-select"
+              >
                 <option value="newest">Newest</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="price-low">Price: Low to High</option>
@@ -205,56 +220,57 @@ function ProductGrid() {
           </div>
         </div>
 
+        {/* Product Grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-2xl bg-[#f3f4f6] flex items-center justify-center mx-auto mb-4">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-20 h-20 rounded-2xl bg-surface-overlay flex items-center justify-center mx-auto mb-4">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-text-faint">
                 <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
               </svg>
             </div>
-            <p className="text-[#374151] text-base font-medium mb-1">No products match your search</p>
-            <p className="text-[#9ca3af] text-sm">Try adjusting your search or filter criteria.</p>
+            <p className="text-text-secondary text-base font-medium mb-1">No products match your search</p>
+            <p className="text-text-faint text-[13px]">Try adjusting your search or filter criteria.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
             {filtered.map((p) => {
               const img = getPrimaryImage(p);
               const salePrice = getDiscountedPrice(p.price);
               const discount = Math.round(DISCOUNT * 100);
               return (
-                <Link key={p.id} href={`/products/${p.id}`} className="group bg-white rounded-xl border border-[#f3f4f6] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
-                  <div className="relative aspect-[4/5] bg-[#f3f4f6] overflow-hidden">
+                <Link key={p.id} href={`/products/${p.id}`} className="product-card group bg-white rounded-xl border border-border-light overflow-hidden flex flex-col">
+                  <div className="relative aspect-[4/5] bg-surface-overlay overflow-hidden">
                     {img ? (
-                      <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={img} alt={p.name} className="product-card-image w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#d1d5db]">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-text-faint">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                      <span className="bg-[#dc2626] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">-{discount}%</span>
+                    <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+                      <span className="badge badge-sale">-{discount}%</span>
                       {p.stock === 0 && (
-                        <span className="bg-[#111827] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">SOLD OUT</span>
+                        <span className="badge badge-out">SOLD OUT</span>
                       )}
                       {p.stock > 0 && p.stock <= 5 && (
-                        <span className="bg-[#d97706] text-white text-[9px] font-bold px-2 py-0.5 tracking-wider rounded-md">LOW STOCK</span>
+                        <span className="badge badge-low">LOW STOCK</span>
                       )}
                     </div>
                   </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <p className="text-[10px] text-[#9ca3af] mb-1 tracking-[0.08em] uppercase font-medium">{p.gender} &middot; {p.subcategory?.replace(/-/g, ' ')}</p>
-                    <h3 className="text-sm font-semibold text-[#374151] mb-2 line-clamp-2 group-hover:text-[#dc2626] transition-colors">{p.name}</h3>
-                    <div className="mt-auto flex items-center justify-between">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-base font-bold text-[#dc2626]">PKR {salePrice.toLocaleString()}</span>
-                        <span className="text-xs text-[#9ca3af] line-through">PKR {p.price.toLocaleString()}</span>
+                  <div className="p-3.5 flex flex-col flex-1">
+                    <p className="text-[10px] text-text-faint mb-1 tracking-[0.06em] uppercase font-medium">{p.gender} &middot; {p.subcategory?.replace(/-/g, ' ')}</p>
+                    <h3 className="text-[13px] font-semibold text-text-secondary mb-2 line-clamp-2 group-hover:text-sale transition-colors leading-snug">{p.name}</h3>
+                    <div className="mt-auto flex items-center justify-between gap-2">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-bold text-sale">PKR {salePrice.toLocaleString()}</span>
+                        <span className="text-[11px] text-text-faint line-through">PKR {p.price.toLocaleString()}</span>
                       </div>
                       {p.stock > 0 && (
-                        <span className="text-[10px] text-[#16a34a] font-medium bg-[#f0fdf4] px-1.5 py-0.5 rounded">In Stock</span>
+                        <span className="text-[10px] text-success font-medium bg-success-light px-1.5 py-0.5 rounded">In Stock</span>
                       )}
                     </div>
                   </div>
@@ -274,8 +290,8 @@ export default function ProductsPage() {
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-2 border-[#dc2626] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-[#6b7280]">Loading products...</p>
+            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-[13px] text-text-muted">Loading products...</p>
           </div>
         </div>
       }>
