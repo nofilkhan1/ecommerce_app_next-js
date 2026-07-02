@@ -2,8 +2,14 @@ import initSqlJs from 'sql.js';
 import type { Database as SqlJsDatabase } from 'sql.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const DB_PATH = path.join(process.cwd(), 'ecommerce.db');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
+const DB_PATH = path.join(PROJECT_ROOT, 'ecommerce.db');
+const SQL_WASM_DIR = path.join(PROJECT_ROOT, 'node_modules', 'sql.js', 'dist');
 
 let db: SqlJsDatabase;
 
@@ -65,7 +71,9 @@ export function execute(sql: string, params?: unknown[]): { changes: number; las
 
 export async function initDb(): Promise<void> {
   if (db) return;
-  const SQL = await initSqlJs();
+  const SQL = await initSqlJs({
+    locateFile: (file: string) => path.join(SQL_WASM_DIR, file),
+  });
   if (fs.existsSync(DB_PATH)) {
     db = new SQL.Database(fs.readFileSync(DB_PATH));
   } else {
