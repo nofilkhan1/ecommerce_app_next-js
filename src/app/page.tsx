@@ -28,8 +28,12 @@ export default function HomePage() {
 
   useEffect(() => {
     fetch('/api/products', { headers: { 'X-API-Key': USER_KEY } })
-      .then((r) => r.json())
-      .then((data) => setFeatured(data.slice(0, 8)))
+      .then(async (r) => {
+        const text = await r.text();
+        if (!text) return [];
+        try { return JSON.parse(text); } catch { return []; }
+      })
+      .then((data) => { if (Array.isArray(data)) setFeatured(data.slice(0, 8)); })
       .catch(() => {});
   }, []);
 

@@ -26,9 +26,13 @@ export default function ProductDetail() {
 
   useEffect(() => {
     fetch(`/api/products/${id}`, { headers: { 'X-API-Key': USER_KEY } })
-      .then((r) => r.json())
+      .then(async (r) => {
+        const text = await r.text();
+        if (!text) throw new Error('Empty response');
+        try { return JSON.parse(text); } catch { throw new Error('Invalid response'); }
+      })
       .then((data) => {
-        if (data.detail) throw new Error(data.detail);
+        if (data && (data.detail || data.message) && !data.id) throw new Error(data.detail || data.message);
         setProduct(data);
       })
       .catch(() => setProduct(null))

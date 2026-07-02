@@ -9,6 +9,7 @@ import Modal from '@/components/ui/modal';
 import EmptyState from '@/components/ui/empty-state';
 import Table, { TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 
 const ADMIN_KEY = 'admin-secret-key-2026';
 const API = '/api/products';
@@ -65,7 +66,30 @@ function getStatus(product: Product) {
   return { label: 'Active', variant: 'success' as const };
 }
 
+async function safeJson(response: Response): Promise<Record<string, unknown> | null> {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function getErrorMessage(response: Response, data: Record<string, unknown> | null): string {
+  if (data && typeof data.message === 'string') return data.message;
+  if (data && typeof data.detail === 'string') return data.detail;
+  switch (response.status) {
+    case 400: return 'Invalid request. Please check your input.';
+    case 401: return 'Unauthorized. Invalid API key.';
+    case 404: return 'Resource not found.';
+    case 500: return 'Server error. Please try again later.';
+    default: return `Request failed (${response.status})`;
+  }
+}
+
 export default function AdminProducts() {
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -77,13 +101,21 @@ export default function AdminProducts() {
   const [saving, setSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
 
-  const load = useCallback(() => {
-    fetch(API, { headers: { 'X-API-Key': ADMIN_KEY } })
-      .then((r) => r.json())
-      .then(setProducts)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch(API, { headers: { 'X-API-Key': ADMIN_KEY } });
+      const data = await safeJson(res);
+      if (Array.isArray(data)) {
+        setProducts(data as Product[]);
+      } else if (!res.ok) {
+        toast('error', getErrorMessage(res, data));
+      }
+    } catch {
+      toast('error', 'Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -148,6 +180,7 @@ export default function AdminProducts() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+
     const body = {
       name: form.name.trim(),
       description: form.description.trim(),
@@ -166,15 +199,19 @@ export default function AdminProducts() {
         headers: { 'Content-Type': 'application/json', 'X-API-Key': ADMIN_KEY },
         body: JSON.stringify(body),
       });
+
+      const data = await safeJson(res);
+
       if (!res.ok) {
-        const err = await res.json();
-        alert('Error: ' + (err.detail || 'Unknown'));
+        toast('error', getErrorMessage(res, data));
         return;
       }
+
+      toast('success', editing ? 'Product updated successfully' : 'Product created successfully');
       closeModal();
       load();
-    } catch (err: unknown) {
-      alert('Error: ' + (err instanceof Error ? err.message : 'Unknown'));
+    } catch {
+      toast('error', 'Network error. Please check your connection.');
     } finally {
       setSaving(false);
     }
@@ -183,10 +220,18 @@ export default function AdminProducts() {
   async function remove(id: number) {
     if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
     try {
-      await fetch(`${API}/${id}`, { method: 'DELETE', headers: { 'X-API-Key': ADMIN_KEY } });
+      const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: { 'X-API-Key': ADMIN_KEY } });
+      const data = await safeJson(res);
+
+      if (!res.ok) {
+        toast('error', getErrorMessage(res, data));
+        return;
+      }
+
+      toast('success', 'Product deleted successfully');
       load();
-    } catch (err: unknown) {
-      alert('Error: ' + (err instanceof Error ? err.message : 'Unknown'));
+    } catch {
+      toast('error', 'Network error. Please check your connection.');
     }
   }
 

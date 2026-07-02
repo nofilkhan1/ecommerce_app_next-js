@@ -36,8 +36,12 @@ function ProductGrid() {
       ? `/api/products?category=${encodeURIComponent(categoryFilter)}`
       : '/api/products';
     fetch(url, { headers: { 'X-API-Key': USER_KEY } })
-      .then((r) => r.json())
-      .then(setProducts)
+      .then(async (r) => {
+        const text = await r.text();
+        if (!text) return [];
+        try { return JSON.parse(text); } catch { return []; }
+      })
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {});
   }, [categoryFilter]);
 

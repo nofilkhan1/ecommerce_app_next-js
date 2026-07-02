@@ -32,8 +32,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetch('/api/products', { headers: { 'X-API-Key': ADMIN_KEY } })
-      .then((r) => r.json())
-      .then(setProducts)
+      .then(async (r) => {
+        const text = await r.text();
+        if (!text) return [];
+        try { return JSON.parse(text); } catch { return []; }
+      })
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
